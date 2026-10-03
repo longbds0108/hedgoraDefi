@@ -763,6 +763,78 @@
     .conc-row { grid-template-columns: 64px 1fr 46px; }
   }
 
+  /* ───── Compare table ───── */
+  .cmp-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-border); border-radius: 14px;
+    background: rgba(22, 18, 31, 0.55);
+  }
+  .cmp-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cmp-table th, .cmp-table td {
+    padding: 13px 18px; text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  .cmp-table tbody tr:last-child th,
+  .cmp-table tbody tr:last-child td { border-bottom: none; }
+  /* row labels stay put while the columns scroll sideways */
+  .cmp-table th[scope="row"] {
+    position: sticky; left: 0; z-index: 2;
+    background: var(--color-surface);
+    min-width: 170px;
+    font-size: 0.84rem; font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+  .cmp-table thead th, .cmp-table thead td {
+    position: sticky; top: 0; z-index: 3;
+    background: var(--color-surface);
+  }
+  .cmp-table thead td.corner { left: 0; z-index: 4; min-width: 170px; }
+  .cmp-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; min-width: 172px;
+  }
+  .cmp-head .nm { font-size: 0.97rem; font-weight: 600; letter-spacing: -0.01em; }
+  .cmp-head .kind {
+    margin-top: 4px;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .cmp-head .rm {
+    flex: none; width: 24px; height: 24px;
+    border: 1px solid var(--color-border); border-radius: 6px;
+    background: transparent; color: var(--color-text-secondary);
+    font-size: 0.78rem; line-height: 1;
+  }
+  .cmp-head .rm:hover { border-color: var(--color-danger); color: var(--color-danger); }
+  .cmp-val {
+    font-family: var(--font-mono); font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .cmp-val.ok { color: var(--color-safe); }
+  .cmp-val.warn { color: var(--color-warning); }
+  .cmp-val .i { margin-right: 6px; }
+  .cmp-val .sub {
+    display: block; margin-top: 4px;
+    font-family: var(--font-body); font-size: 0.74rem;
+    color: var(--color-text-secondary);
+  }
+  .cmp-mix { min-width: 158px; }
+  .cmp-mix .apy-meter { margin: 2px 0 9px; }
+  .cmp-table tfoot td { border-bottom: none; padding-top: 16px; padding-bottom: 18px; }
+  .cmp-slot {
+    display: grid; place-items: center; gap: 8px;
+    min-width: 172px; min-height: 92px; padding: 16px;
+    border: 1px dashed var(--color-border); border-radius: 10px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: transparent; width: 100%;
+  }
+  .cmp-slot:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .cmp-slot .plus { font-size: 1.15rem; }
+
   /* ───── Placeholder (page scaffold, pending content) ───── */
   .placeholder {
     border: 1px dashed var(--color-border);
@@ -1862,19 +1934,16 @@
     <section class="view" data-view="compare">
       <div class="page-head">
         <div>
-          <h1>Compare</h1>
-          <div class="sub">Side-by-side comparison of selected protocols</div>
+          <h1>Compare USDC opportunities</h1>
+          <div class="sub">Same metrics, same source, side by side · up to 3 at a time</div>
         </div>
         <div class="page-head-actions">
-          <button class="btn btn-ghost btn-sm" data-view="explore">+ Add protocol</button>
+          <button class="btn btn-ghost btn-sm" id="cmp-reset">Clear all</button>
+          <button class="btn btn-primary btn-sm" data-view="explore" id="cmp-add">+ Add protocol</button>
         </div>
       </div>
 
-      <div class="placeholder">
-        <div class="ph-mark">Compare</div>
-        <h4>Comparison matrix</h4>
-        <p>Selected protocols lined up across the same metrics go here.</p>
-      </div>
+      <div id="cmp-body"></div>
     </section>
 
     <!-- ══════════════════════════ VIEW: PORTFOLIO ══════════════════════════ -->
@@ -2194,27 +2263,51 @@
     });
   })();
 
+  // ─── Shared store: the opportunity set and the compare selection ───
+  // Explore and Compare read the same rows, so their numbers cannot drift apart.
+  // organic + incentive always equals apy; tvl and liq are in millions.
+  const Store = (() => {
+    const DATA = [
+      { name: 'Protocol X', type: 'lending', asset: 'usdc',   label: 'USDC Lending',       apy: 7.42,  organic: 5.21, incentive: 2.21, tvl: 8.4,  liq: 2.1,  audited: true,  upgradeable: true,  admin: 'EOA + 3/5', oracle: 'Single feed', flags: [['good', 'Audited'], ['warn', 'Upgradeable']] },
+      { name: 'Protocol A', type: 'lending', asset: 'usdc',   label: 'USDC Lending',       apy: 5.40,  organic: 4.80, incentive: 0.60, tvl: 12.0, liq: 4.8,  audited: true,  upgradeable: true,  admin: '3/5',       oracle: 'Single feed', flags: [['good', 'Audited'], ['warn', 'Single oracle'], ['warn', 'Upgradeable']] },
+      { name: 'Protocol B', type: 'vault',   asset: 'usdc',   label: 'USDC Yield vault',   apy: 8.90,  organic: 3.10, incentive: 5.80, tvl: 6.4,  liq: 0.9,  audited: false, upgradeable: true,  admin: 'EOA',       oracle: 'Single feed', flags: [['warn', 'Unaudited'], ['warn', 'Rewards end in 18d'], ['warn', 'Concentrated TVL']] },
+      { name: 'Protocol C', type: 'lp',      asset: 'usdc',   label: 'USDC Stable pool',   apy: 4.10,  organic: 4.10, incentive: 0.00, tvl: 29.0, liq: 11.2, audited: true,  upgradeable: false, admin: 'DAO',       oracle: 'Dual feed',   flags: [['good', 'Audited'], ['good', 'No incentives'], ['warn', 'Withdrawal queue']] },
+      { name: 'Protocol D', type: 'lending', asset: 'cirbtc', label: 'cirBTC Lending',     apy: 3.20,  organic: 2.60, incentive: 0.60, tvl: 18.0, liq: 6.1,  audited: true,  upgradeable: true,  admin: '4/7',       oracle: 'Dual feed',   flags: [['good', 'Audited'], ['warn', 'Upgradeable']] },
+      { name: 'Protocol E', type: 'vault',   asset: 'cirbtc', label: 'cirBTC Yield vault', apy: 6.80,  organic: 2.20, incentive: 4.60, tvl: 4.1,  liq: 0.6,  audited: true,  upgradeable: true,  admin: '3/5',       oracle: 'Single feed', flags: [['good', 'Audited'], ['warn', 'Concentrated TVL']] },
+      { name: 'Protocol F', type: 'vault',   asset: 'usdc',   label: 'USDC Yield vault',   apy: 11.40, organic: 2.80, incentive: 8.60, tvl: 2.3,  liq: 0.4,  audited: false, upgradeable: true,  admin: 'EOA',       oracle: 'Single feed', flags: [['warn', 'Unaudited'], ['warn', 'Incentive-heavy']] },
+      { name: 'Protocol G', type: 'lp',      asset: 'usdc',   label: 'USDC/cirBTC pool',   apy: 9.10,  organic: 6.30, incentive: 2.80, tvl: 7.7,  liq: 3.2,  audited: true,  upgradeable: true,  admin: '2/5',       oracle: 'Dual feed',   flags: [['good', 'Audited'], ['warn', 'Upgradeable']] },
+      { name: 'Protocol H', type: 'lending', asset: 'other',  label: 'EURC Lending',       apy: 4.60,  organic: 4.10, incentive: 0.50, tvl: 5.2,  liq: 2.4,  audited: true,  upgradeable: false, admin: 'DAO',       oracle: 'Dual feed',   flags: [['good', 'Audited']] },
+    ];
+
+    const MAX = 3;
+    const compare = new Set();
+    const subs = [];
+    const notify = () => subs.forEach(fn => fn());
+
+    return {
+      DATA, MAX,
+      get size() { return compare.size; },
+      get picked() { return DATA.filter(d => compare.has(d.name)); },
+      has: n => compare.has(n),
+      full: () => compare.size >= MAX,
+      toggle(n) {
+        if (compare.has(n)) compare.delete(n);
+        else if (compare.size < MAX) compare.add(n);
+        else return;
+        notify();
+      },
+      remove(n) { if (compare.delete(n)) notify(); },
+      clear() { if (compare.size) { compare.clear(); notify(); } },
+      onChange(fn) { subs.push(fn); },
+    };
+  })();
+
   // ─── Explore: filters, sort, compare ───
   (function () {
     const list = document.getElementById('exp-list');
     if (!list) return;
 
-    // organic + incentive always equals apy; tvl and liq are in millions
-    const DATA = [
-      { name: 'Protocol X', type: 'lending', asset: 'usdc',   label: 'USDC Lending',      apy: 7.42, organic: 5.21, incentive: 2.21, tvl: 8.4,  liq: 2.1,  flags: [['good', 'Audited'], ['warn', 'Upgradeable']] },
-      { name: 'Protocol A', type: 'lending', asset: 'usdc',   label: 'USDC Lending',      apy: 5.40, organic: 4.80, incentive: 0.60, tvl: 12.0, liq: 4.8,  flags: [['good', 'Audited'], ['warn', 'Single oracle'], ['warn', 'Upgradeable']] },
-      { name: 'Protocol B', type: 'vault',   asset: 'usdc',   label: 'USDC Yield vault',  apy: 8.90, organic: 3.10, incentive: 5.80, tvl: 6.4,  liq: 0.9,  flags: [['warn', 'Unaudited'], ['warn', 'Rewards end in 18d'], ['warn', 'Concentrated TVL']] },
-      { name: 'Protocol C', type: 'lp',      asset: 'usdc',   label: 'USDC Stable pool',  apy: 4.10, organic: 4.10, incentive: 0.00, tvl: 29.0, liq: 11.2, flags: [['good', 'Audited'], ['good', 'No incentives'], ['warn', 'Withdrawal queue']] },
-      { name: 'Protocol D', type: 'lending', asset: 'cirbtc', label: 'cirBTC Lending',    apy: 3.20, organic: 2.60, incentive: 0.60, tvl: 18.0, liq: 6.1,  flags: [['good', 'Audited'], ['warn', 'Upgradeable']] },
-      { name: 'Protocol E', type: 'vault',   asset: 'cirbtc', label: 'cirBTC Yield vault', apy: 6.80, organic: 2.20, incentive: 4.60, tvl: 4.1, liq: 0.6,  flags: [['good', 'Audited'], ['warn', 'Concentrated TVL']] },
-      { name: 'Protocol F', type: 'vault',   asset: 'usdc',   label: 'USDC Yield vault',  apy: 11.40, organic: 2.80, incentive: 8.60, tvl: 2.3, liq: 0.4,  flags: [['warn', 'Unaudited'], ['warn', 'Incentive-heavy']] },
-      { name: 'Protocol G', type: 'lp',      asset: 'usdc',   label: 'USDC/cirBTC pool',  apy: 9.10, organic: 6.30, incentive: 2.80, tvl: 7.7,  liq: 3.2,  flags: [['good', 'Audited'], ['warn', 'Upgradeable']] },
-      { name: 'Protocol H', type: 'lending', asset: 'other',  label: 'EURC Lending',      apy: 4.60, organic: 4.10, incentive: 0.50, tvl: 5.2,  liq: 2.4,  flags: [['good', 'Audited']] },
-    ];
-
-    const MAX_COMPARE = 4;
-    const compare = new Set();
-
+    const DATA = Store.DATA;
     const tabs = document.getElementById('exp-tabs');
     const search = document.getElementById('exp-search');
     const searchWrap = document.getElementById('exp-search-wrap');
@@ -2235,7 +2328,7 @@
     function card(d) {
       const oPct = d.apy > 0 ? (d.organic / d.apy) * 100 : 0;
       const liqPct = Math.round((d.liq / d.tvl) * 100);
-      const picked = compare.has(d.name);
+      const picked = Store.has(d.name);
 
       const segments = d.incentive > 0
         ? `<span class="organic" style="width:${oPct.toFixed(1)}%" title="Organic ${d.organic.toFixed(2)}% — earned by the protocol"></span>` +
@@ -2271,7 +2364,8 @@
         <div class="ocard-flags">${flags}</div>
         <div class="ocard-actions">
           <button class="btn btn-primary btn-sm" data-view="detail">Analyze</button>
-          <button class="btn btn-ghost btn-sm btn-compare${picked ? ' added' : ''}" data-cmp="${esc(d.name)}">${picked ? '✓ Added' : '+ Compare'}</button>
+          <button class="btn btn-ghost btn-sm btn-compare${picked ? ' added' : ''}" data-cmp="${esc(d.name)}"
+                  ${!picked && Store.full() ? `disabled title="Compare holds ${Store.MAX} at a time — remove one first"` : ''}>${picked ? '✓ Added' : '+ Compare'}</button>
         </div>
       </article>`;
     }
@@ -2312,9 +2406,9 @@
     }
 
     function renderTray() {
-      trayN.textContent = compare.size;
-      trayNames.textContent = Array.from(compare).join(' · ');
-      tray.classList.toggle('on', compare.size > 0);
+      trayN.textContent = Store.size;
+      trayNames.textContent = Store.picked.map(d => d.name).join(' · ');
+      tray.classList.toggle('on', Store.size > 0);
     }
 
     tabs.addEventListener('click', e => {
@@ -2325,38 +2419,12 @@
       render();
     });
 
-    function toggleCompare(name) {
-      if (compare.has(name)) {
-        compare.delete(name);
-      } else {
-        if (compare.size >= MAX_COMPARE) return;
-        compare.add(name);
-      }
-      renderTray();
-      render();
-    }
-
     list.addEventListener('click', e => {
       const btn = e.target.closest('[data-cmp]');
-      if (btn) toggleCompare(btn.dataset.cmp);
+      if (btn) Store.toggle(btn.dataset.cmp);
     });
 
-    // the detail page's own compare button feeds the same set
-    const pdCompare = document.getElementById('pd-compare');
-    if (pdCompare) {
-      pdCompare.addEventListener('click', () => {
-        toggleCompare(pdCompare.dataset.cmp);
-        const on = compare.has(pdCompare.dataset.cmp);
-        pdCompare.classList.toggle('added', on);
-        pdCompare.textContent = on ? '✓ Added to compare' : '+ Compare';
-      });
-    }
-
-    document.getElementById('cmp-clear').addEventListener('click', () => {
-      compare.clear();
-      renderTray();
-      render();
-    });
+    document.getElementById('cmp-clear').addEventListener('click', () => Store.clear());
 
     document.getElementById('exp-search-clear').addEventListener('click', () => {
       search.value = '';
@@ -2377,8 +2445,273 @@
     [search, sort, apyRange, tvlRange].forEach(el => el.addEventListener('input', render));
     assetBoxes.forEach(b => b.addEventListener('change', render));
 
+    Store.onChange(() => { render(); renderTray(); });
     render();
     renderTray();
+  })();
+
+  // ─── Protocol detail: compare button feeds the shared set ───
+  (function () {
+    const btn = document.getElementById('pd-compare');
+    if (!btn) return;
+    const sync = () => {
+      const on = Store.has(btn.dataset.cmp);
+      btn.classList.toggle('added', on);
+      btn.textContent = on ? '✓ Added to compare' : '+ Compare';
+      btn.disabled = !on && Store.full();
+    };
+    btn.addEventListener('click', () => Store.toggle(btn.dataset.cmp));
+    Store.onChange(sync);
+    sync();
+  })();
+
+  // ─── Compare: side-by-side table built from the shared set ───
+  (function () {
+    const body = document.getElementById('cmp-body');
+    if (!body) return;
+
+    const h = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+    const money = v => '$' + (v >= 10 ? v.toFixed(0) : v.toFixed(1)) + 'M';
+    const share = d => d.apy > 0 ? (d.incentive / d.apy) * 100 : 0;
+    const liqPct = d => Math.round((d.liq / d.tvl) * 100);
+
+    const ROWS = [
+      { label: 'APY', cell: d => ({ text: d.apy.toFixed(2) + '%' }) },
+      { label: 'Yield mix', mix: true },
+      { label: 'Organic APY', cell: d => ({ text: d.organic.toFixed(2) + '%' }) },
+      { label: 'Incentives', cell: d => ({ text: d.incentive.toFixed(2) + '%' }) },
+      { label: 'Incentive share', cell: d => {
+          const s = Math.round(share(d));
+          return { text: s + '%', kind: s >= 30 ? 'warn' : null };
+        } },
+      { label: 'TVL', cell: d => ({ text: money(d.tvl) }) },
+      { label: 'Available liquidity', cell: d => ({ text: money(d.liq), sub: liqPct(d) + '% of deposits' }) },
+      { label: 'Audited', cell: d => d.audited
+          ? { text: 'Yes', icon: '✓', kind: 'ok' }
+          : { text: 'No', icon: '⚠', kind: 'warn' } },
+      { label: 'Upgradeable', cell: d => d.upgradeable
+          ? { text: 'Yes', icon: '⚠', kind: 'warn' }
+          : { text: 'No', icon: '✓', kind: 'ok' } },
+      { label: 'Admin', cell: d => ({ text: d.admin, kind: d.admin.includes('EOA') ? 'warn' : null }) },
+      { label: 'Oracle', cell: d => ({ text: d.oracle, kind: d.oracle === 'Single feed' ? 'warn' : null }) },
+    ];
+
+    // Readings, not a verdict: each line states a fact and the trade-off that
+    // comes with it. Nothing here ranks one protocol as the right choice.
+    function observations(rows) {
+      const out = [];
+      const topApy = rows.reduce((a, b) => b.apy > a.apy ? b : a);
+      const topOrg = rows.reduce((a, b) => b.organic > a.organic ? b : a);
+      const thin = rows.reduce((a, b) => liqPct(b) < liqPct(a) ? b : a);
+
+      const s = Math.round(share(topApy));
+      const lead = rows.length > 1
+        ? `${topApy.name} offers the highest APY at ${topApy.apy.toFixed(2)}%`
+        : `${topApy.name} pays ${topApy.apy.toFixed(2)}%`;
+      out.push({
+        kind: s >= 30 ? 'warn' : 'good',
+        text: s > 0
+          ? `${lead}, while ${s}% of its current yield comes from incentives.`
+          : `${lead}, and none of it comes from incentives.`,
+      });
+
+      if (topOrg.name !== topApy.name) {
+        out.push({
+          kind: 'good',
+          text: `${topOrg.name} has the highest organic APY at ${topOrg.organic.toFixed(2)}% — the part that does not depend on a rewards program.`,
+        });
+      }
+
+      if (rows.length > 1) {
+        const p = liqPct(thin);
+        out.push({
+          kind: p < 20 ? 'warn' : 'good',
+          text: p < 20
+            ? `${thin.name} has the thinnest withdrawal liquidity here: ${money(thin.liq)}, or ${p}% of its deposits.`
+            : `The lowest withdrawal liquidity in this set is ${thin.name} at ${p}% of deposits (${money(thin.liq)}).`,
+        });
+      }
+
+      // a bare EOA is the plainest case, so it gets named ahead of a mixed setup
+      const bareKey = rows.find(d => d.upgradeable && d.admin === 'EOA');
+      const mixedKey = rows.find(d => d.upgradeable && d.admin.startsWith('EOA') && d.admin !== 'EOA');
+      if (bareKey) {
+        out.push({
+          kind: 'warn',
+          text: `${bareKey.name} can be upgraded by one externally-owned key, with no multisig in the way.`,
+        });
+      } else if (mixedKey) {
+        out.push({
+          kind: 'warn',
+          text: `${mixedKey.name} routes parameter changes through a multisig, but upgrades still sit with a single key.`,
+        });
+      } else {
+        const fixed = rows.find(d => !d.upgradeable);
+        if (fixed) out.push({ kind: 'good', text: `${fixed.name} is not upgradeable — its code cannot be replaced.` });
+      }
+      return out.slice(0, 4);
+    }
+
+    function addSlot(label) {
+      const b = h('button', 'cmp-slot');
+      b.dataset.view = 'explore';
+      b.append(h('span', 'plus', '+'), h('span', null, label));
+      return b;
+    }
+
+    const resetBtn = document.getElementById('cmp-reset');
+
+    function render() {
+      const rows = Store.picked;
+      body.textContent = '';
+      resetBtn.disabled = rows.length === 0;
+
+      if (!rows.length) {
+        const empty = h('div', 'placeholder');
+        empty.append(
+          h('div', 'ph-mark', 'Compare'),
+          h('h4', null, 'Nothing selected yet'),
+          h('p', null, `Pick up to ${Store.MAX} opportunities in Explore and they line up here across the same metrics.`),
+        );
+        const cta = h('div', null);
+        cta.style.marginTop = '20px';
+        const btn = h('button', 'btn btn-primary btn-sm', 'Go to Explore →');
+        btn.dataset.view = 'explore';
+        cta.appendChild(btn);
+        empty.appendChild(cta);
+        body.appendChild(empty);
+        return;
+      }
+
+      const wrap = h('div', 'cmp-wrap');
+      const table = h('table', 'cmp-table');
+
+      // header: one column per pick, plus an add slot while there is room
+      const thead = h('thead');
+      const hr = h('tr');
+      hr.appendChild(h('td', 'corner'));
+      rows.forEach(d => {
+        const th = h('th');
+        th.setAttribute('scope', 'col');
+        const head = h('div', 'cmp-head');
+        const ident = h('div');
+        ident.append(h('div', 'nm', d.name), h('div', 'kind', d.label));
+        const rm = h('button', 'rm', '✕');
+        rm.setAttribute('aria-label', 'Remove ' + d.name);
+        rm.dataset.rm = d.name;
+        head.append(ident, rm);
+        th.appendChild(head);
+        hr.appendChild(th);
+      });
+      if (rows.length < Store.MAX) {
+        const th = h('th');
+        th.appendChild(addSlot('Add'));
+        hr.appendChild(th);
+      }
+      thead.appendChild(hr);
+      table.appendChild(thead);
+
+      const tbody = h('tbody');
+      ROWS.forEach(def => {
+        const tr = h('tr');
+        const label = h('th', null, def.label);
+        label.setAttribute('scope', 'row');
+        tr.appendChild(label);
+
+        rows.forEach(d => {
+          const td = h('td');
+          if (def.mix) {
+            const box = h('div', 'cmp-mix');
+            const meter = h('div', 'apy-meter');
+            const oPct = d.apy > 0 ? (d.organic / d.apy) * 100 : 0;
+            const org = h('span', 'organic');
+            org.style.width = oPct.toFixed(1) + '%';
+            org.setAttribute('title', `Organic ${d.organic.toFixed(2)}%`);
+            meter.appendChild(org);
+            if (d.incentive > 0) {
+              const inc = h('span', 'incentive');
+              inc.style.width = (100 - oPct).toFixed(1) + '%';
+              inc.setAttribute('title', `Incentive ${d.incentive.toFixed(2)}%`);
+              meter.appendChild(inc);
+            }
+            const legend = h('div', 'meter-legend');
+            const item = h('span', 'item');
+            item.append(h('span', 'sw organic'), h('span', null, `${Math.round(100 - share(d))}% organic`));
+            legend.appendChild(item);
+            box.append(meter, legend);
+            td.appendChild(box);
+          } else {
+            const spec = def.cell(d);
+            const v = h('span', 'cmp-val' + (spec.kind ? ' ' + spec.kind : ''));
+            if (spec.icon) {
+              const i = h('span', 'i', spec.icon);
+              i.setAttribute('aria-hidden', 'true');
+              v.appendChild(i);
+            }
+            v.appendChild(document.createTextNode(spec.text));
+            if (spec.sub) v.appendChild(h('span', 'sub', spec.sub));
+            td.appendChild(v);
+          }
+          tr.appendChild(td);
+        });
+
+        if (rows.length < Store.MAX) tr.appendChild(h('td'));
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      const tfoot = h('tfoot');
+      const fr = h('tr');
+      fr.appendChild(h('td'));
+      rows.forEach(() => {
+        const td = h('td');
+        const a = h('button', 'btn btn-ghost btn-sm', 'View full analysis →');
+        a.dataset.view = 'detail';
+        td.appendChild(a);
+        fr.appendChild(td);
+      });
+      if (rows.length < Store.MAX) fr.appendChild(h('td'));
+      tfoot.appendChild(fr);
+      table.appendChild(tfoot);
+
+      wrap.appendChild(table);
+      body.appendChild(wrap);
+
+      const obs = observations(rows);
+      const panel = h('div', 'know');
+      panel.append(
+        h('h3', null, 'What stands out'),
+        h('div', 'sub', rows.length === 1
+          ? 'Add a second opportunity to see these side by side.'
+          : `Readings across the ${rows.length} selected opportunities — not a recommendation.`),
+      );
+      const ul = h('div', 'know-list');
+      obs.forEach(o => {
+        const item = h('div', 'know-item ' + o.kind);
+        const mark = h('span', 'mark', o.kind === 'warn' ? '⚠' : '✓');
+        mark.setAttribute('aria-hidden', 'true');
+        const txt = h('div');
+        txt.appendChild(h('div', 'txt', o.text));
+        item.append(mark, txt);
+        ul.appendChild(item);
+      });
+      panel.appendChild(ul);
+      body.appendChild(panel);
+    }
+
+    body.addEventListener('click', e => {
+      const rm = e.target.closest('[data-rm]');
+      if (rm) Store.remove(rm.dataset.rm);
+    });
+    resetBtn.addEventListener('click', () => Store.clear());
+
+    Store.onChange(render);
+    render();
   })();
 
   // ─── Execution mode toggle (create mandate) ───
