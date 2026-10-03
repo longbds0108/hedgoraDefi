@@ -30,6 +30,12 @@
     --chart-incentive: #B78A25;
     --chart-bar: #796AE6;
     --chart-grid: #241F31;
+
+    /* Ordinal ramp for data provenance, most verifiable to least.
+       Monotone lightness, ΔL 0.09, all three ≥ 3:1 on --color-surface. */
+    --src-1: #938AF9;
+    --src-2: #796EDA;
+    --src-3: #6052BC;
     --font-body: 'Inter Tight', sans-serif;
   }
 
@@ -766,126 +772,210 @@
     .conc-row { grid-template-columns: 64px 1fr 46px; }
   }
 
-  /* ───── Methodology ───── */
+  /* ───── Methodology ─────
+     Source is an ordered scale, not a set of identities: on-chain is directly
+     verifiable, derived is computed from it, external is taken on trust. So it
+     gets a one-hue ordinal ramp (validated: monotone L, ΔL ≥ 0.06, all three
+     steps ≥ 3:1 on the surface) rather than three categorical hues. */
   .meth-lede {
-    max-width: 680px; margin-bottom: 22px;
-    font-size: 1.02rem; line-height: 1.6;
+    max-width: 620px; margin-bottom: 22px;
+    font-size: 0.98rem; line-height: 1.6;
+    color: var(--color-text-secondary);
   }
-  .meth-lede .strike {
-    display: block; margin-bottom: 12px;
-    font-size: 0.92rem; color: var(--color-text-secondary);
-  }
-  .meth-lede .strike q { text-decoration: line-through; opacity: 0.75; }
-  .meth-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
-    margin-bottom: 20px; padding: 13px 18px;
-    border: 1px solid var(--color-border); border-radius: 11px;
-    background: rgba(22, 18, 31, 0.55);
-  }
-  .meth-bar .refreshed {
-    font-family: var(--font-mono); font-size: 0.72rem;
-    letter-spacing: 0.05em; color: var(--color-text-secondary);
-  }
-  .meth-bar .refreshed strong { color: var(--color-text-primary); font-weight: 500; }
-  .src-key { display: flex; gap: 8px; flex-wrap: wrap; }
+  .meth-lede .strike { color: var(--color-text-primary); }
+  .meth-lede .strike q { text-decoration: line-through; opacity: 0.6; }
 
-  /* Source is encoded by fill and glyph, not hue — the status colours stay
-     reserved for severity elsewhere in the app. */
-  .src {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 3px 10px; border-radius: 999px;
-    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    white-space: nowrap;
+  /* ── coverage: one square per signal ── */
+  .cov {
+    display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 32px; align-items: center;
+    padding: 26px 28px;
+    background: linear-gradient(150deg, var(--color-surface) 0%, rgba(22, 18, 31, 0.7) 100%);
+    border: 1px solid var(--color-border); border-radius: 14px;
+    margin-bottom: 20px;
   }
-  .src .g { font-size: 0.72rem; line-height: 1; }
-  .src.onchain {
-    background: var(--color-surface-hover);
-    border: 1px solid rgba(232, 227, 213, 0.3);
+  .cov-fig { text-align: center; }
+  .cov-fig .n {
+    font-family: var(--font-body); font-size: 3.4rem; font-weight: 600;
+    letter-spacing: -0.045em; line-height: 1;
+    font-variant-numeric: proportional-nums;
+  }
+  .cov-fig .l {
+    margin-top: 8px;
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  /* wider gap between source groups than inside one, so the split reads by
+     position as well as by colour */
+  .unit-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+  .unit-group { display: flex; gap: 3px; }
+  .unit {
+    width: 24px; height: 24px; border-radius: 5px;
+    background: var(--src-1);
+  }
+  .unit.derived { background: var(--src-2); }
+  .unit.external { background: var(--src-3); }
+  .cov-key { display: grid; gap: 9px; }
+  .cov-key .row {
+    display: grid; grid-template-columns: 20px 28px auto 1fr;
+    gap: 11px; align-items: baseline;
+    font-size: 0.85rem;
+  }
+  .cov-key .sw { width: 13px; height: 13px; border-radius: 3px; }
+  .cov-key .sw.onchain { background: var(--src-1); }
+  .cov-key .sw.derived { background: var(--src-2); }
+  .cov-key .sw.external { background: var(--src-3); }
+  .cov-key .c {
+    font-family: var(--font-mono); font-size: 0.95rem;
+    font-variant-numeric: tabular-nums; text-align: right;
     color: var(--color-text-primary);
   }
-  .src.external {
-    background: transparent;
-    border: 1px solid var(--color-border);
+  .cov-key .k { font-weight: 500; }
+  .cov-key .d { color: var(--color-text-secondary); font-size: 0.82rem; }
+  .cov-foot {
+    grid-column: 1 / -1;
+    margin-top: 4px; padding-top: 18px;
+    border-top: 1px solid var(--color-border);
+    display: flex; gap: 10px 22px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 0.71rem;
     color: var(--color-text-secondary);
   }
-  .src.derived {
-    background: transparent;
-    border: 1px dashed var(--color-border);
+  .cov-foot strong { color: var(--color-text-primary); font-weight: 500; }
+
+  /* ── the five groups as cards ── */
+  .grp-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+    gap: 16px; margin-bottom: 22px;
+  }
+  .grp {
+    padding: 20px; border-radius: 13px;
+    border: 1px solid var(--color-border);
+    background: rgba(22, 18, 31, 0.55);
+    transition: border-color .25s ease;
+  }
+  .grp:hover { border-color: rgba(232, 227, 213, 0.28); }
+  .grp-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+  .grp-head .n {
+    font-family: var(--font-mono); font-size: 0.78rem;
+    color: var(--color-accent); opacity: 0.75;
+  }
+  .grp-head .t {
+    font-size: 0.86rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .grp-head .c {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 0.68rem;
+    color: var(--color-text-secondary);
+  }
+  .grp-units { display: flex; gap: 3px; margin-bottom: 15px; }
+  .grp-units span {
+    width: 100%; height: 6px; border-radius: 3px;
+    background: var(--src-1);
+  }
+  .grp-units span.derived { background: var(--src-2); }
+  .grp-units span.external { background: var(--src-3); }
+  .grp-sig {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 0; font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .grp-sig:last-child { border-bottom: none; }
+  .grp-sig .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; background: var(--src-1); }
+  .grp-sig .dot.derived { background: var(--src-2); }
+  .grp-sig .dot.external { background: var(--src-3); }
+  .grp-sig .fresh {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 0.66rem;
     color: var(--color-text-secondary);
   }
 
-  .sig-wrap { overflow-x: auto; }
+  /* ── full detail, folded away ── */
+  .meth-table { border: 1px solid var(--color-border); border-radius: 13px; overflow: hidden; }
+  .meth-table summary {
+    padding: 14px 20px; cursor: pointer; list-style: none;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+    background: rgba(22, 18, 31, 0.55);
+  }
+  .meth-table summary::-webkit-details-marker { display: none; }
+  .meth-table summary::before { content: '▸ '; }
+  .meth-table[open] summary::before { content: '▾ '; }
+  .meth-table summary:hover { color: var(--color-accent); }
+  .meth-table .scroll { overflow-x: auto; border-top: 1px solid var(--color-border); }
   .sig-table { width: 100%; border-collapse: separate; border-spacing: 0; }
   .sig-table th, .sig-table td {
-    padding: 12px 18px; text-align: left; vertical-align: top;
+    padding: 11px 20px; text-align: left; vertical-align: top;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
   .sig-table thead th {
-    position: sticky; top: 0; z-index: 2;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
-    font-family: var(--font-mono); font-size: 0.64rem; font-weight: 600;
+    font-family: var(--font-mono); font-size: 0.63rem; font-weight: 600;
     letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--color-text-secondary);
   }
-  .sig-table tr.group td {
-    padding-top: 26px; padding-bottom: 10px;
-    border-bottom: 1px solid var(--color-border);
-    background: transparent;
-  }
-  .sig-table tr.group:first-child td { padding-top: 14px; }
-  .sig-group-label { display: flex; align-items: baseline; gap: 12px; }
-  .sig-group-label .n {
-    font-family: var(--font-mono); font-size: 0.82rem;
-    color: var(--color-accent); opacity: 0.8;
-  }
-  .sig-group-label .t {
-    font-size: 0.95rem; font-weight: 600;
-    letter-spacing: 0.02em; text-transform: uppercase;
-  }
-  .sig-table .nm { font-size: 0.88rem; font-weight: 500; white-space: nowrap; }
-  .sig-table .rd { font-size: 0.84rem; line-height: 1.5; color: var(--color-text-secondary); }
+  .sig-table .nm { font-size: 0.86rem; font-weight: 500; white-space: nowrap; }
+  .sig-table .rd { font-size: 0.83rem; line-height: 1.5; color: var(--color-text-secondary); }
   .sig-table .up {
-    font-family: var(--font-mono); font-size: 0.76rem;
+    font-family: var(--font-mono); font-size: 0.74rem;
     color: var(--color-text-secondary); white-space: nowrap;
   }
+  .sig-table .src-cell {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--color-text-secondary); white-space: nowrap;
+  }
+  .sig-table .src-cell .sw { width: 10px; height: 10px; border-radius: 2px; flex: none; background: var(--src-1); }
+  .sig-table .src-cell .sw.derived { background: var(--src-2); }
+  .sig-table .src-cell .sw.external { background: var(--src-3); }
   .sig-table tbody tr:last-child td { border-bottom: none; }
 
-  /* ───── MVP flow ───── */
-  .flow { display: grid; gap: 0; justify-items: center; }
-  .flow-step {
-    width: 100%; max-width: 440px;
-    display: grid; grid-template-columns: 30px 1fr auto;
-    align-items: center; gap: 14px;
-    padding: 14px 18px;
-    border: 1px solid var(--color-border); border-radius: 11px;
-    background: linear-gradient(150deg, var(--color-surface) 0%, rgba(22, 18, 31, 0.72) 100%);
-    text-align: left;
+  /* ───── MVP flow — one rail instead of eight stacked boxes ───── */
+  .flow-rail {
+    padding: 20px; border-radius: 13px;
+    border: 1px solid var(--color-border);
+    background: rgba(22, 18, 31, 0.55);
+  }
+  .flow-rail-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+  .flow-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 14px; border-radius: 9px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.86rem;
     transition: border-color .2s ease, transform .2s ease;
   }
-  a.flow-step:hover, button.flow-step:hover {
+  a.flow-chip:hover, button.flow-chip:hover {
     border-color: var(--color-accent); transform: translateY(-1px);
   }
-  .flow-step .n {
-    font-family: var(--font-mono); font-size: 0.72rem;
+  .flow-chip .n {
+    font-family: var(--font-mono); font-size: 0.65rem;
     color: var(--color-text-secondary);
   }
-  .flow-step .t { font-size: 0.92rem; font-weight: 500; }
-  .flow-step .go { color: var(--color-text-secondary); font-size: 0.85rem; }
-  .flow-step.wide { max-width: 560px; }
-  .flow-step.static { background: transparent; border-style: dashed; }
-  .flow-link { width: 1px; height: 22px; background: var(--color-border); }
-  .flow-facets {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    grid-column: 1 / -1; margin-top: 4px;
+  .flow-chip.inert { border-style: dashed; background: transparent; color: var(--color-text-secondary); }
+  .flow-arrow { color: var(--color-text-secondary); opacity: 0.55; font-size: 0.85rem; }
+  .flow-reads {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+  .flow-reads .lead {
+    font-family: var(--font-mono); font-size: 0.66rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--color-text-secondary); margin-right: 4px;
   }
   .flow-facet {
-    padding: 4px 11px; border-radius: 999px;
+    padding: 5px 11px; border-radius: 999px;
     border: 1px solid var(--color-border); background: var(--color-bg);
-    font-family: var(--font-mono); font-size: 0.66rem;
-    letter-spacing: 0.06em; color: var(--color-text-secondary);
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.04em; color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 760px) {
+    .cov { grid-template-columns: 1fr; gap: 22px; }
   }
 
   /* ───── Risk monitor ─────
@@ -2328,67 +2418,69 @@
       </div>
 
       <div class="meth-lede">
-        <span class="strike">We do not tell you <q>this protocol is risky</q> and leave it there.</span>
-        A verdict you cannot audit is just our opinion wearing a number. Below is the full
-        list of what we look at — so you can check our reading, or disagree with it.
+        <span class="strike">We do not say <q>this protocol is risky</q> and leave it there.</span>
+        Here is every signal we read, how verifiable each one is, and when we last read it.
       </div>
 
-      <div class="meth-bar">
-        <span class="refreshed">Last full refresh <strong>2026-10-03 14:12 UTC</strong> · block <strong>4,812,655</strong></span>
-        <span class="src-key">
-          <span class="src onchain"><span class="g" aria-hidden="true">◆</span>On-chain</span>
-          <span class="src external"><span class="g" aria-hidden="true">◇</span>External</span>
-          <span class="src derived"><span class="g" aria-hidden="true">ƒ</span>Derived</span>
-        </span>
+      <div class="cov">
+        <div class="cov-fig">
+          <div class="n">16</div>
+          <div class="l">Signals read</div>
+        </div>
+        <div>
+          <div class="unit-grid" id="cov-units"></div>
+          <div class="cov-key" id="cov-key"></div>
+        </div>
+        <div class="cov-foot" id="cov-foot"></div>
       </div>
 
-      <div class="glass sig-wrap">
-        <table class="sig-table">
-          <thead>
-            <tr>
-              <th>Signal</th>
-              <th>What we read</th>
-              <th>Source</th>
-              <th>Updated</th>
-            </tr>
-          </thead>
-          <tbody id="meth-body"></tbody>
-        </table>
-      </div>
+      <div class="grp-grid" id="meth-groups"></div>
+
+      <details class="meth-table">
+        <summary>Full signal table · what each one reads</summary>
+        <div class="scroll">
+          <table class="sig-table">
+            <thead>
+              <tr><th>Signal</th><th>What we read</th><th>Source</th><th>Updated</th></tr>
+            </thead>
+            <tbody id="meth-body"></tbody>
+          </table>
+        </div>
+      </details>
 
       <div class="know" style="margin-top: 22px;">
         <h3>What we do not do</h3>
-        <div class="sub">The three things that would make everything above meaningless</div>
         <div class="know-list">
           <div class="know-item warn">
             <span class="mark" aria-hidden="true">⚠</span>
-            <div>
-              <div class="txt">We do not publish a single risk score.</div>
-              <div class="why">Collapsing these signals into one grade hides the one that would have changed your mind. Weighting them is your job, not ours.</div>
-            </div>
+            <div><div class="txt">No single risk score — one grade would hide the signal that changes your mind.</div></div>
           </div>
           <div class="know-item warn">
             <span class="mark" aria-hidden="true">⚠</span>
-            <div>
-              <div class="txt">We do not rank protocols or recommend allocations.</div>
-              <div class="why">No "best vault" list, no default sort by APY. The order you see reflects the filter you chose.</div>
-            </div>
+            <div><div class="txt">No ranking, no recommended allocation. The order you see is the filter you chose.</div></div>
           </div>
           <div class="know-item good">
             <span class="mark" aria-hidden="true">✓</span>
-            <div>
-              <div class="txt">We do not sell placement, and we mark what we cannot see.</div>
-              <div class="why">No protocol pays to appear here. Off-chain custody, unpublished audits and admin intent are labelled unknown rather than assumed safe.</div>
-            </div>
+            <div><div class="txt">No paid placement, and anything we cannot observe is marked unknown, never assumed safe.</div></div>
           </div>
         </div>
       </div>
 
       <div class="pf-section-head" style="margin-top: 30px;">
         <h2>Where each signal appears</h2>
-        <span class="sub">The path through the product · click a step to open it</span>
+        <span class="sub">Click a step to open it</span>
       </div>
-      <div class="flow" id="meth-flow"></div>
+      <div class="flow-rail">
+        <div class="flow-rail-steps" id="meth-flow"></div>
+        <div class="flow-reads">
+          <span class="lead">Step 04 reads</span>
+          <span class="flow-facet">Yield</span>
+          <span class="flow-facet">Liquidity</span>
+          <span class="flow-facet">Security</span>
+          <span class="flow-facet">Admin</span>
+          <span class="flow-facet">Concentration</span>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -2856,10 +2948,10 @@
     sync();
   })();
 
-  // ─── Methodology: signal inventory and product flow ───
+  // ─── Methodology: signal inventory, coverage chart and product flow ───
   (function () {
-    const tbody = document.getElementById('meth-body');
-    if (!tbody) return;
+    const units = document.getElementById('cov-units');
+    if (!units) return;
 
     const h = (tag, cls, text) => {
       const e = document.createElement(tag);
@@ -2868,19 +2960,18 @@
       return e;
     };
 
-    // Each row names its source and its freshness, because a signal is only
-    // worth as much as the reader's ability to check where it came from.
-    const SRC = {
-      onchain: ['◆', 'On-chain'],
-      external: ['◇', 'External'],
-      derived: ['ƒ', 'Derived'],
-    };
+    // Ordered most verifiable to least — the ramp follows this order.
+    const SOURCES = [
+      ['onchain', 'On-chain', 'Read straight from the contract'],
+      ['derived', 'Derived', 'Computed from on-chain values'],
+      ['external', 'External', 'Published sources we re-check'],
+    ];
 
     const GROUPS = [
       { n: '01', title: 'Security', rows: [
-        ['Audit', 'Published reports, the firm, the date, and which version was reviewed', 'external', 'Checked 2026-10-01'],
         ['Contract verification', 'Deployed bytecode matched against published source', 'onchain', 'Live'],
         ['Upgradeability', 'Proxy pattern, and whether an implementation slot can be rewritten', 'onchain', 'Live'],
+        ['Audit', 'Published reports, the firm, the date, and which version was reviewed', 'external', '2026-10-01'],
       ] },
       { n: '02', title: 'Liquidity', rows: [
         ['TVL', 'Token balance held by the vault contract', 'onchain', 'Live'],
@@ -2900,37 +2991,99 @@
       { n: '05', title: 'Yield', rows: [
         ['Base yield', 'Rate the protocol pays out of its own revenue', 'onchain', 'Live'],
         ['Borrow yield', 'Borrow rate applied across current utilization', 'derived', 'Live'],
-        ['Incentives', 'Emission rate on-chain; program end date from the published schedule', 'external', 'Daily'],
         ['Yield sustainability', 'Organic share of APY, and what is left if incentives stop', 'derived', 'Live'],
+        ['Incentives', 'Emission rate on-chain; program end date from the published schedule', 'external', 'Daily'],
       ] },
     ];
 
-    GROUPS.forEach(g => {
-      const gr = h('tr', 'group');
-      const gtd = h('td');
-      gtd.setAttribute('colspan', '4');
-      const label = h('div', 'sig-group-label');
-      label.append(h('span', 'n', g.n), h('span', 't', g.title));
-      gtd.appendChild(label);
-      gr.appendChild(gtd);
-      tbody.appendChild(gr);
+    const ALL = GROUPS.flatMap(g => g.rows.map(r => ({ group: g.title, name: r[0], reads: r[1], src: r[2], up: r[3] })));
 
-      g.rows.forEach(([name, reads, src, updated]) => {
-        const tr = h('tr');
-        tr.appendChild(h('td', 'nm', name));
-        tr.appendChild(h('td', 'rd', reads));
-
-        const srcTd = h('td');
-        const badge = h('span', 'src ' + src);
-        const glyph = h('span', 'g', SRC[src][0]);
-        glyph.setAttribute('aria-hidden', 'true');
-        badge.append(glyph, document.createTextNode(SRC[src][1]));
-        srcTd.appendChild(badge);
-        tr.appendChild(srcTd);
-
-        tr.appendChild(h('td', 'up', updated));
-        tbody.appendChild(tr);
+    // ── one square per signal, grouped by how verifiable it is ──
+    SOURCES.forEach(([key, label]) => {
+      const mine = ALL.filter(s => s.src === key);
+      if (!mine.length) return;
+      const group = h('div', 'unit-group');
+      mine.forEach(s => {
+        const cell = h('span', 'unit ' + key);
+        cell.setAttribute('title', `${s.name} · ${label} · ${s.up}`);
+        group.appendChild(cell);
       });
+      units.appendChild(group);
+    });
+
+    const key = document.getElementById('cov-key');
+    SOURCES.forEach(([k, label, desc]) => {
+      const row = h('div', 'row');
+      row.append(
+        h('span', 'sw ' + k),
+        h('span', 'c', String(ALL.filter(s => s.src === k).length)),
+        h('span', 'k', label),
+        h('span', 'd', desc),
+      );
+      key.appendChild(row);
+    });
+
+    // freshness, counted rather than repeated on every row
+    const foot = document.getElementById('cov-foot');
+    const fresh = {};
+    ALL.forEach(s => {
+      const bucket = /^\d/.test(s.up) ? 'dated' : s.up.toLowerCase();
+      fresh[bucket] = (fresh[bucket] || 0) + 1;
+    });
+    [
+      ['Live', `${fresh.live || 0} read every block`],
+      ['Hourly', `${fresh.hourly || 0} re-read hourly`],
+      ['Daily', `${fresh.daily || 0} re-read daily`],
+      ['Manual', `${fresh.dated || 0} checked by hand`],
+    ].forEach(([, text]) => {
+      const span = h('span');
+      const n = text.split(' ')[0];
+      span.append(h('strong', null, n), document.createTextNode(text.slice(n.length)));
+      foot.appendChild(span);
+    });
+    const block = h('span');
+    block.append(document.createTextNode('Block '), h('strong', null, '4,812,655'));
+    foot.appendChild(block);
+
+    // ── the five groups ──
+    const grid = document.getElementById('meth-groups');
+    GROUPS.forEach(g => {
+      const card = h('div', 'grp');
+
+      const head = h('div', 'grp-head');
+      head.append(h('span', 'n', g.n), h('span', 't', g.title),
+        h('span', 'c', g.rows.length + ' signals'));
+      card.appendChild(head);
+
+      // a proportional strip: how verifiable this group's signals are
+      const strip = h('div', 'grp-units');
+      g.rows.forEach(([, , src]) => strip.appendChild(h('span', src)));
+      card.appendChild(strip);
+
+      g.rows.forEach(([name, reads, src, up]) => {
+        const row = h('div', 'grp-sig');
+        row.setAttribute('title', reads);
+        row.append(h('span', 'dot ' + src), h('span', null, name), h('span', 'fresh', up));
+        card.appendChild(row);
+      });
+
+      grid.appendChild(card);
+    });
+
+    // ── full table, folded away so the page leads with the picture ──
+    const tbody = document.getElementById('meth-body');
+    const LABEL = Object.fromEntries(SOURCES.map(([k, l]) => [k, l]));
+    ALL.forEach(s => {
+      const tr = h('tr');
+      tr.appendChild(h('td', 'nm', s.name));
+      tr.appendChild(h('td', 'rd', s.reads));
+      const srcTd = h('td');
+      const cell = h('span', 'src-cell');
+      cell.append(h('span', 'sw ' + s.src), document.createTextNode(LABEL[s.src]));
+      srcTd.appendChild(cell);
+      tr.appendChild(srcTd);
+      tr.appendChild(h('td', 'up', s.up));
+      tbody.appendChild(tr);
     });
 
     // ── the path through the product, doubling as navigation ──
@@ -2938,33 +3091,24 @@
       { n: '01', t: 'Home', href: 'index.html' },
       { n: '02', t: 'Explore', view: 'explore' },
       { n: '03', t: 'USDC vault', view: 'detail' },
-      { n: '04', t: 'Protocol analysis', view: 'detail', wide: true,
-        facets: ['Yield', 'Liquidity', 'Security', 'Admin', 'Concentration'] },
+      { n: '04', t: 'Protocol analysis', view: 'detail' },
       { n: '05', t: 'Compare', view: 'compare' },
       { n: '06', t: 'Deposit', note: 'on the protocol page' },
       { n: '07', t: 'Portfolio', view: 'portfolio' },
       { n: '08', t: 'Risk monitor', view: 'alerts' },
     ];
 
-    const flow = document.getElementById('meth-flow');
+    const rail = document.getElementById('meth-flow');
     FLOW.forEach((step, i) => {
-      if (i) flow.appendChild(h('div', 'flow-link'));
-
+      if (i) rail.appendChild(h('span', 'flow-arrow', '→'));
       const interactive = step.href || step.view;
-      const el = step.href ? h('a') : interactive ? h('button') : h('div');
-      el.className = 'flow-step' + (step.wide ? ' wide' : '') + (interactive ? '' : ' static');
+      const el = step.href ? h('a') : interactive ? h('button') : h('span');
+      el.className = 'flow-chip' + (interactive ? '' : ' inert');
       if (step.href) el.setAttribute('href', step.href);
       if (step.view) el.dataset.view = step.view;
-
+      if (step.note) el.setAttribute('title', step.note);
       el.append(h('span', 'n', step.n), h('span', 't', step.t));
-      el.appendChild(h('span', 'go', interactive ? '→' : step.note));
-
-      if (step.facets) {
-        const row = h('div', 'flow-facets');
-        step.facets.forEach(f => row.appendChild(h('span', 'flow-facet', f)));
-        el.appendChild(row);
-      }
-      flow.appendChild(el);
+      rail.appendChild(el);
     });
   })();
 
