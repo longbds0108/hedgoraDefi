@@ -704,7 +704,10 @@
     align-items: center; gap: 12px; padding: 7px 0;
   }
   .conc-row .who { font-size: 0.82rem; color: var(--color-text-secondary); }
-  .conc-row .track { height: 14px; }
+  .conc-row .track {
+    height: 14px; border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+  }
   /* one series, one colour: bar length already encodes the value */
   .conc-row .bar {
     height: 100%; border-radius: 0 4px 4px 0;
@@ -762,6 +765,62 @@
     .hero-stats { grid-template-columns: 1fr; }
     .conc-row { grid-template-columns: 64px 1fr 46px; }
   }
+
+  /* ───── Portfolio ───── */
+  .pf-hero {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 20px; margin-bottom: 24px;
+  }
+  .pf-hero .hero-fig .val { font-size: 3.1rem; }
+  .pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-content: start; }
+  .pf-stats .stat .val { font-size: 1.45rem; }
+  .pf-section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 14px; margin: 4px 0 16px;
+  }
+  .pf-section-head h2 { font-size: 1.1rem; letter-spacing: -0.02em; }
+  .pf-section-head .sub { font-size: 0.8rem; color: var(--color-text-secondary); }
+  .pos-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(318px, 1fr)); gap: 18px; margin-bottom: 26px; }
+  .ocard.pos .ocard-rows { margin-top: 0; }
+  .ocard.pos .meter-legend { margin-bottom: 16px; }
+  .pos-flag-label {
+    margin-bottom: 8px;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  /* ───── Yield dependency ───── */
+  .apy-meter.lg { height: 14px; margin: 4px 0 16px; }
+  .apy-meter.lg .organic { border-radius: 4px 0 0 4px; }
+  .apy-meter.lg .incentive { border-radius: 0 4px 4px 0; }
+  .dep-row {
+    display: grid; grid-template-columns: 11px 1fr auto auto;
+    gap: 12px; align-items: baseline; padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+  }
+  .dep-row:last-child { border-bottom: none; }
+  .dep-row .sw { width: 11px; height: 11px; border-radius: 2px; }
+  .dep-row .sw.organic { background: var(--chart-organic); }
+  .dep-row .sw.incentive { background: var(--chart-incentive); }
+  .dep-row .k { font-size: 0.86rem; }
+  .dep-row .p {
+    font-family: var(--font-mono); font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .dep-row .amt {
+    min-width: 92px; text-align: right;
+    font-family: var(--font-mono); font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+  }
+  .dep-swing {
+    margin-top: 16px; padding: 14px 16px; border-radius: 10px;
+    border: 1px solid rgba(232, 181, 76, 0.3);
+    background: rgba(232, 181, 76, 0.07);
+    font-size: 0.86rem; line-height: 1.55;
+  }
+  .dep-swing strong { color: var(--color-warning); }
 
   /* ───── Compare table ───── */
   .cmp-wrap {
@@ -854,6 +913,7 @@
     font-size: 1.02rem; font-weight: 600;
     color: var(--color-text-primary);
   }
+  .placeholder .btn { margin-top: 20px; }
   .placeholder p {
     margin: 0 auto;
     max-width: 440px;
@@ -1951,17 +2011,44 @@
       <div class="page-head">
         <div>
           <h1>Portfolio</h1>
-          <div class="sub">Your positions across protocols</div>
+          <div class="sub">Positions read from your connected wallet · 0xa94c…37f1</div>
         </div>
         <div class="page-head-actions">
           <button class="btn btn-ghost btn-sm">Refresh ↻</button>
         </div>
       </div>
 
-      <div class="placeholder">
-        <div class="ph-mark">Portfolio</div>
-        <h4>Holdings and allocation</h4>
-        <p>Balances, allocation breakdown and position history go here.</p>
+      <div class="pf-hero">
+        <div class="hero-fig">
+          <div class="lbl">Total portfolio value</div>
+          <div class="val" id="pf-total">—</div>
+          <div class="split" id="pf-blended">—</div>
+        </div>
+        <div class="pf-stats" id="pf-stats"></div>
+      </div>
+
+      <div class="pf-section-head">
+        <h2>Positions</h2>
+        <span class="sub" id="pf-pos-note"></span>
+      </div>
+      <div class="pos-list" id="pf-positions"></div>
+
+      <div class="grid-even">
+        <div class="glass">
+          <div class="panel-head">
+            <h3>Protocol exposure</h3>
+            <span class="sub">Share of deposits</span>
+          </div>
+          <div class="panel-body" id="pf-exposure"></div>
+        </div>
+
+        <div class="glass">
+          <div class="panel-head">
+            <h3>Yield dependency</h3>
+            <span class="sub">Where your yield comes from</span>
+          </div>
+          <div class="panel-body" id="pf-dependency"></div>
+        </div>
       </div>
     </section>
 
@@ -2465,6 +2552,187 @@
     sync();
   })();
 
+  // ─── Portfolio: positions, exposure and yield dependency ───
+  (function () {
+    const totalOut = document.getElementById('pf-total');
+    if (!totalOut) return;
+
+    // Only the wallet-specific facts live here; rate and risk data come from
+    // Store, so a position can never disagree with its Explore card.
+    const POSITIONS = [
+      { name: 'Protocol A', deposited: 1500, earned: 18.42 },
+      { name: 'Protocol B', deposited: 960,  earned: 61.30 },
+      { name: 'Protocol C', deposited: 1390, earned: 32.28 },
+    ];
+    const WALLET = 318.42;
+
+    const h = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+    const usd = (v, dp) => '$' + v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+
+    const rows = POSITIONS.map(p => Object.assign({}, Store.DATA.find(d => d.name === p.name), p));
+    const deposited = rows.reduce((s, r) => s + r.deposited, 0);
+    const claimable = rows.reduce((s, r) => s + r.earned, 0);
+    const total = deposited + claimable + WALLET;
+
+    const organicYr = rows.reduce((s, r) => s + r.deposited * r.organic / 100, 0);
+    const incentiveYr = rows.reduce((s, r) => s + r.deposited * r.incentive / 100, 0);
+    const yieldYr = organicYr + incentiveYr;
+    const orgShare = (organicYr / yieldYr) * 100;
+    const blended = (yieldYr / deposited) * 100;
+    const blendedOrganic = (organicYr / deposited) * 100;
+
+    totalOut.textContent = usd(total, 2);
+    document.getElementById('pf-blended').textContent =
+      `Blended APY ${blended.toFixed(2)}% across ${rows.length} positions`;
+
+    // headline numbers as a KPI row — three values, so no chart
+    const stats = document.getElementById('pf-stats');
+    [
+      ['Deposited', usd(deposited, 0), 'Earning yield in protocols'],
+      ['Claimable', usd(claimable, 2), 'Accrued, not yet withdrawn'],
+      ['Wallet', usd(WALLET, 2), 'Idle USDC, earning nothing'],
+    ].forEach(([label, value, note]) => {
+      const card = h('div', 'stat');
+      card.append(h('div', 'lbl', label), h('div', 'val', value), h('div', 'delta', note));
+      stats.appendChild(card);
+    });
+
+    document.getElementById('pf-pos-note').textContent =
+      `${usd(deposited, 0)} deposited · ${usd(claimable, 2)} claimable`;
+
+    // ── position cards ──
+    const list = document.getElementById('pf-positions');
+    rows.forEach(r => {
+      const card = h('article', 'ocard pos');
+
+      const head = h('div', 'ocard-head');
+      const ident = h('div');
+      ident.append(h('div', 'nm', r.name), h('div', 'cat', r.label));
+      head.appendChild(ident);
+      card.appendChild(head);
+
+      const body = h('div', 'ocard-rows');
+      [
+        ['Deposited', usd(r.deposited, 0)],
+        ['Current APY', r.apy.toFixed(2) + '%'],
+        ['Earned', usd(r.earned, 2)],
+      ].forEach(([k, v]) => {
+        const row = h('div', 'orow');
+        row.append(h('span', 'k', k), h('span', 'v', v));
+        body.appendChild(row);
+      });
+      card.appendChild(body);
+
+      // the same organic/incentive split used everywhere else
+      const meter = h('div', 'apy-meter');
+      const oPct = (r.organic / r.apy) * 100;
+      const org = h('span', 'organic');
+      org.style.width = oPct.toFixed(1) + '%';
+      org.setAttribute('title', `Organic ${r.organic.toFixed(2)}%`);
+      meter.appendChild(org);
+      if (r.incentive > 0) {
+        const inc = h('span', 'incentive');
+        inc.style.width = (100 - oPct).toFixed(1) + '%';
+        inc.setAttribute('title', `Incentive ${r.incentive.toFixed(2)}%`);
+        meter.appendChild(inc);
+      }
+      card.appendChild(meter);
+
+      const legend = h('div', 'meter-legend');
+      const li = h('span', 'item');
+      li.append(h('span', 'sw organic'), h('span', null, `${Math.round(oPct)}% organic`));
+      legend.appendChild(li);
+      if (r.incentive > 0) {
+        const li2 = h('span', 'item');
+        li2.append(h('span', 'sw incentive'), h('span', null, `${Math.round(100 - oPct)}% incentive`));
+        legend.appendChild(li2);
+      }
+      card.appendChild(legend);
+
+      const warns = r.flags.filter(f => f[0] === 'warn');
+      card.appendChild(h('div', 'pos-flag-label',
+        warns.length ? 'Risk indicators' : 'No open risk indicators'));
+
+      if (warns.length) {
+        const flags = h('div', 'ocard-flags');
+        warns.forEach(([, text]) => {
+          const pill = h('span', 'flag-pill warn');
+          const i = h('span', 'i', '⚠');
+          i.setAttribute('aria-hidden', 'true');
+          pill.append(i, document.createTextNode(text));
+          flags.appendChild(pill);
+        });
+        card.appendChild(flags);
+      }
+
+      const actions = h('div', 'ocard-actions');
+      const view = h('button', 'btn btn-ghost btn-sm', 'View position');
+      view.dataset.view = 'detail';
+      actions.appendChild(view);
+      card.appendChild(actions);
+
+      list.appendChild(card);
+    });
+
+    // ── protocol exposure: one hue, bar length is the share of deposits ──
+    const exp = document.getElementById('pf-exposure');
+    rows.slice().sort((a, b) => b.deposited - a.deposited).forEach(r => {
+      const pct = (r.deposited / deposited) * 100;
+      const row = h('div', 'conc-row');
+      const track = h('span', 'track');
+      const bar = h('span', 'bar');
+      bar.style.width = pct.toFixed(1) + '%';
+      bar.setAttribute('title', `${usd(r.deposited, 0)} of ${usd(deposited, 0)}`);
+      track.appendChild(bar);
+      row.append(h('span', 'who', r.name), track, h('span', 'pct', Math.round(pct) + '%'));
+      exp.appendChild(row);
+    });
+    const expNote = h('div', 'kv-note');
+    const biggest = rows.reduce((a, b) => b.deposited > a.deposited ? b : a);
+    expNote.textContent = `Bars show each protocol's share of your ${usd(deposited, 0)} in deposits. `
+      + `Your largest single exposure is ${biggest.name} at ${usd(biggest.deposited, 0)}.`;
+    exp.appendChild(expNote);
+
+    // ── yield dependency ──
+    const dep = document.getElementById('pf-dependency');
+    const depMeter = h('div', 'apy-meter lg');
+    const dOrg = h('span', 'organic');
+    dOrg.style.width = orgShare.toFixed(1) + '%';
+    dOrg.setAttribute('title', `Organic ${usd(organicYr, 2)} per year`);
+    const dInc = h('span', 'incentive');
+    dInc.style.width = (100 - orgShare).toFixed(1) + '%';
+    dInc.setAttribute('title', `Incentives ${usd(incentiveYr, 2)} per year`);
+    depMeter.append(dOrg, dInc);
+    dep.appendChild(depMeter);
+
+    [
+      ['organic', 'Organic yield', orgShare, organicYr],
+      ['incentive', 'Incentives', 100 - orgShare, incentiveYr],
+    ].forEach(([kind, label, pct, amount]) => {
+      const row = h('div', 'dep-row');
+      row.append(
+        h('span', 'sw ' + kind),
+        h('span', 'k', label),
+        h('span', 'p', Math.round(pct) + '%'),
+        h('span', 'amt', usd(amount, 2) + '/yr'),
+      );
+      dep.appendChild(row);
+    });
+
+    const swing = h('div', 'dep-swing');
+    const strong = h('strong', null,
+      `If every incentive program stopped, your blended APY would fall from ${blended.toFixed(2)}% to ${blendedOrganic.toFixed(2)}%.`);
+    swing.appendChild(strong);
+    swing.appendChild(document.createTextNode(
+      ` That is ${usd(incentiveYr, 2)} a year of the ${usd(yieldYr, 2)} you are currently earning.`));
+    dep.appendChild(swing);
+  })();
+
   // ─── Compare: side-by-side table built from the shared set ───
   (function () {
     const body = document.getElementById('cmp-body');
@@ -2578,12 +2846,9 @@
           h('h4', null, 'Nothing selected yet'),
           h('p', null, `Pick up to ${Store.MAX} opportunities in Explore and they line up here across the same metrics.`),
         );
-        const cta = h('div', null);
-        cta.style.marginTop = '20px';
         const btn = h('button', 'btn btn-primary btn-sm', 'Go to Explore →');
         btn.dataset.view = 'explore';
-        cta.appendChild(btn);
-        empty.appendChild(cta);
+        empty.appendChild(btn);
         body.appendChild(empty);
         return;
       }
