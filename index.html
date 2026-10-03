@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MandateFi</title>
-<meta name="description" content="Policy-controlled DeFi vault on Ethereum Sepolia. Your AI agent manages USDC only within limits you approve." />
+<meta name="description" content="DeFi risk analytics on Arc. Understand where yield comes from and what risks your USDC is exposed to — no single risk score, just the indicators." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
@@ -53,6 +53,11 @@
 
   h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
   a { color: inherit; text-decoration: none; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
   .mono, code { font-family: var(--font-mono); }
 
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
@@ -312,7 +317,7 @@
     .reveal { opacity: 1; transform: none; transition: none; }
   }
 
-  /* ─────────────── Section — Flow ─────────────── */
+  /* ─────────────── Section — Market overview ─────────────── */
   .section-dark {
     padding: 120px 48px;
     background: var(--color-bg);
@@ -340,208 +345,10 @@
     color: var(--color-accent);
   }
 
-  .flow-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  }
-  .flow-card {
-    position: relative;
-    padding: 32px 28px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    min-height: 320px;
-    display: flex; flex-direction: column;
-    transition: border-color .3s ease, transform .35s cubic-bezier(0.22, 1, 0.36, 1);
-    overflow: hidden;
-  }
-  .flow-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--color-accent), transparent);
-    transform: translateX(-100%);
-    transition: transform .9s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .flow-card::after {
-    content: '';
-    position: absolute; inset: auto -40% -60% auto;
-    width: 240px; height: 240px;
-    background: radial-gradient(circle, rgba(232, 227, 213, 0.08), transparent 65%);
-    opacity: 0;
-    transition: opacity .4s ease;
-    pointer-events: none;
-  }
-  .flow-card:hover {
-    border-color: var(--color-accent);
-    transform: translateY(-4px);
-  }
-  .flow-card:hover::before { transform: translateX(0); }
-  .flow-card:hover::after { opacity: 1; }
-  .flow-card .foot {
-    position: relative;
-    transition: letter-spacing .3s ease;
-  }
-  .flow-card:hover .foot { letter-spacing: 0.12em; }
-  .flow-card .num {
-    font-family: var(--font-mono); font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    color: var(--color-text-secondary);
-    margin-bottom: 32px;
-  }
-  .flow-card h3 {
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: 1.5rem;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-    margin-bottom: 16px;
-  }
-  .flow-card p {
-    color: var(--color-text-secondary);
-    font-size: 0.92rem; line-height: 1.6;
-    margin-bottom: auto;
-  }
-  .flow-card .foot {
-    margin-top: 32px;
-    font-family: var(--font-mono); font-size: 0.72rem;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--color-accent);
-    display: inline-flex; align-items: center; gap: 8px;
-  }
-
-  /* ─────────────── Section — Two surfaces ─────────────── */
+  /* ─────────────── Section — Opportunities ─────────────── */
   .markets {
     padding: 120px 48px;
     background: var(--color-bg);
-  }
-  .markets-grid {
-    display: grid; grid-template-columns: 4fr 8fr; gap: 60px;
-    align-items: start;
-  }
-  .markets-rail h2 {
-    font-family: var(--font-body);
-    font-weight: 400;
-    font-size: clamp(2.4rem, 3.8vw, 3.8rem);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    margin-bottom: 24px;
-  }
-  .markets-rail h2 em {
-    font-family: var(--font-display);
-    font-style: italic; font-weight: 400;
-    color: var(--color-accent);
-  }
-  .markets-rail .source {
-    margin-top: 32px;
-    font-family: var(--font-mono); font-size: 0.72rem;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--color-text-secondary);
-    line-height: 1.6;
-  }
-  .markets-cards {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-  }
-  .mcard {
-    position: relative;
-    min-height: min(620px, 78svh);
-    padding: 36px;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    background: linear-gradient(140deg, #1a1527 0%, #0E0B14 100%);
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    transition: border-color .35s ease, transform .5s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .mcard:hover {
-    border-color: rgba(232, 227, 213, 0.4);
-    transform: translateY(-6px);
-  }
-  .mcard.two:hover { border-color: rgba(63, 145, 255, 0.5); }
-  .mcard::after {
-    content: '';
-    position: absolute; left: 0; right: 0; bottom: 0;
-    height: 2px;
-    background: linear-gradient(to right, transparent, var(--color-accent), transparent);
-    transform: scaleX(0); transform-origin: left center;
-    transition: transform .8s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .mcard.two::after { background: linear-gradient(to right, transparent, var(--landing-blue, #3f91ff), transparent); }
-  .mcard:hover::after { transform: scaleX(1); }
-  .mcard.one::before {
-    content: ''; position: absolute; top: -120px; right: -120px;
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(232, 227, 213, 0.3), transparent 60%);
-  }
-  .mcard.two::before {
-    content: ''; position: absolute; top: -120px; right: -120px;
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(63, 145, 255, 0.28), transparent 60%);
-  }
-  .mcard .idx {
-    position: relative;
-    font-family: var(--font-mono); font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    color: var(--color-text-secondary);
-    margin-bottom: 12px;
-  }
-  .mcard .status {
-    position: relative;
-    font-family: var(--font-mono); font-size: 0.68rem;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--color-safe);
-    margin-bottom: 48px;
-    display: inline-flex; align-items: center; gap: 8px;
-  }
-  .mcard .status::before {
-    content: '●'; color: var(--color-safe);
-  }
-  .mcard .ident {
-    position: relative;
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: 1.4rem;
-    letter-spacing: -0.02em;
-    margin-bottom: 16px;
-  }
-  .mcard .desc {
-    position: relative;
-    color: var(--color-text-secondary);
-    font-size: 0.9rem; line-height: 1.55;
-    margin-bottom: auto;
-    max-width: 340px;
-  }
-  .mcard .big-stat {
-    position: relative;
-    margin-top: 48px;
-  }
-  .mcard .big-stat .lbl {
-    font-family: var(--font-mono); font-size: 0.7rem;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--color-text-secondary);
-    margin-bottom: 10px;
-  }
-  .mcard .big-stat .val {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 2.6rem;
-    line-height: 1;
-    color: var(--color-text-primary);
-    letter-spacing: -0.02em;
-  }
-  .mcard .big-stat .val .unit {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    margin-left: 6px;
-  }
-  .mcard .foot {
-    position: relative;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid var(--color-border);
-    font-family: var(--font-mono); font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
   }
 
   /* ─────────────── Section — Principles (paper) ─────────────── */
@@ -840,13 +647,179 @@
     content: '·'; padding: 0 10px; color: var(--color-border);
   }
 
+  /* ─────────────── Hero search ─────────────── */
+  .hero-search {
+    position: relative;
+    margin-top: 40px;
+    max-width: 520px;
+  }
+  .hero-search .icon {
+    position: absolute; left: 20px; top: 27px;
+    transform: translateY(-50%);
+    font-size: 0.92rem;
+    color: var(--color-text-secondary);
+    pointer-events: none;
+  }
+  .hero-search input {
+    width: 100%; height: 54px;
+    padding: 0 20px 0 50px;
+    background: rgba(22, 18, 31, 0.6);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    font-family: var(--font-body); font-size: 0.95rem;
+    outline: none;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .hero-search input::placeholder { color: var(--color-text-secondary); }
+  .hero-search input:focus {
+    border-color: var(--color-accent);
+    background: rgba(22, 18, 31, 0.92);
+  }
+  .hero-search .hint {
+    margin-top: 14px;
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  /* ─────────────── Market overview strip ─────────────── */
+  .metric-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--color-border);
+    border-left: 1px solid var(--color-border);
+  }
+  .metric {
+    padding: 30px 26px;
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    transition: background .25s ease;
+  }
+  .metric:hover { background: rgba(232, 227, 213, 0.03); }
+  .metric .lbl {
+    font-family: var(--font-mono); font-size: 0.67rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 18px;
+  }
+  .metric .val {
+    font-size: clamp(2rem, 3.2vw, 2.9rem);
+    font-weight: 400; letter-spacing: -0.05em; line-height: 1;
+    color: var(--color-text-primary);
+  }
+  .metric .val .unit {
+    font-family: var(--font-mono);
+    font-size: 0.78rem; letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    margin-left: 8px;
+  }
+  .metric .note {
+    margin-top: 14px;
+    font-size: 0.8rem; line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+  .metric.flagged .val { color: var(--color-warning); }
+
+  /* ─────────────── Opportunities ─────────────── */
+  .opp-cat {
+    display: flex; align-items: baseline; gap: 14px;
+    margin: 56px 0 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .opp-cat h3 {
+    font-family: var(--font-mono); font-size: 0.78rem;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600; color: var(--color-text-primary);
+  }
+  .opp-cat .count {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.08em; color: var(--color-text-secondary);
+  }
+  .opp-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .opp-card {
+    position: relative;
+    padding: 28px 26px 26px;
+    background: linear-gradient(160deg, var(--color-surface) 0%, rgba(22, 18, 31, 0.72) 100%);
+    border: 1px solid var(--color-border);
+    display: flex; flex-direction: column;
+    transition: border-color .3s ease, transform .35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .opp-card:hover {
+    border-color: rgba(232, 227, 213, 0.34);
+    transform: translateY(-3px);
+  }
+  .opp-card .name {
+    font-size: 1.5rem; font-weight: 400;
+    letter-spacing: -0.04em; line-height: 1.1;
+    margin-bottom: 6px;
+    color: var(--color-text-primary);
+  }
+  .opp-card .venue {
+    font-family: var(--font-mono); font-size: 0.67rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 24px;
+  }
+  .opp-metrics { margin-bottom: 22px; }
+  .opp-metric {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 14px; padding: 11px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .opp-metric:last-child { border-bottom: none; }
+  .opp-metric .k {
+    font-family: var(--font-mono); font-size: 0.69rem;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .opp-metric .v {
+    font-family: var(--font-mono); font-size: 0.95rem;
+    color: var(--color-text-primary); white-space: nowrap;
+  }
+  .opp-metric.lead .v {
+    font-size: 1.35rem; letter-spacing: -0.02em;
+    color: var(--color-accent);
+  }
+  .opp-metric .v .delta {
+    font-size: 0.72rem; color: var(--color-text-secondary);
+    margin-left: 7px;
+  }
+  .risk-flags {
+    display: flex; flex-direction: column; gap: 9px;
+    margin-bottom: 26px;
+  }
+  .risk-flag {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.805rem; line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+  .risk-flag::before {
+    content: ''; flex: none;
+    width: 5px; height: 5px; margin-top: 6px;
+    background: var(--color-warning);
+  }
+  .risk-flag.clear::before { background: var(--color-safe); }
+  .risk-flag.severe::before { background: var(--color-danger); }
+  .opp-card .act { margin-top: auto; }
+  .act-link {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 12px 17px;
+    font-family: var(--font-mono); font-size: 0.71rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    transition: border-color .2s ease, color .2s ease;
+  }
+  .act-link:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
   /* ─────────────── Responsive ─────────────── */
   @media (max-width: 1100px) {
+    .metric-strip { grid-template-columns: repeat(2, 1fr); }
+    .opp-grid { grid-template-columns: repeat(2, 1fr); }
     .hero { grid-template-columns: 1fr; padding-top: 140px; }
     .section-head { grid-template-columns: 1fr; gap: 24px; }
-    .markets-grid { grid-template-columns: 1fr; }
-    .markets-cards { grid-template-columns: 1fr; }
-    .flow-grid { grid-template-columns: 1fr; }
     .principle-grid { grid-template-columns: repeat(2, 1fr); }
     .cta-section { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -856,6 +829,8 @@
     .nav { display: none; }
     .hero, .section-dark, .markets, .principles, .faq, .cta-section, .footer { padding-left: 20px; padding-right: 20px; }
     .principle-grid { grid-template-columns: 1fr; }
+    .metric-strip { grid-template-columns: 1fr; }
+    .opp-grid { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr; }
     .footer-bottom { flex-direction: column; gap: 12px; align-items: flex-start; }
   }
@@ -875,9 +850,9 @@
   </div>
   <nav class="nav">
     <span class="nav-pill" id="nav-pill"></span>
-    <a href="#flow" data-section="flow">Protocol</a>
-    <a href="#surfaces" data-section="surfaces">Vault</a>
-    <a href="#principles" data-section="principles">Principles</a>
+    <a href="#market" data-section="market">Market</a>
+    <a href="#opportunities" data-section="opportunities">Opportunities</a>
+    <a href="#method" data-section="method">Method</a>
     <a href="#faq" data-section="faq">FAQ</a>
   </nav>
   <div class="header-right">
@@ -889,17 +864,25 @@
 <!-- Hero -->
 <section class="hero" data-header-theme="dark">
   <div class="hero-copy">
-    <div class="kicker">POLICY-CONTROLLED VAULT · ETHEREUM SEPOLIA</div>
-    <h1>Your capital<br />should move<br /><em>within limits</em></h1>
+    <div class="kicker">DEFI RISK ANALYTICS · ARC</div>
+    <h1>Know the risk<br />before you<br /><em>deposit</em></h1>
     <p class="lede">
-      Deposit test USDC, mint a mandate, and let an AI agent rebalance within the per-tx, daily and destination rules you sign on-chain.
+      Understand where DeFi yield comes from and what risks your USDC is exposed to.
     </p>
     <div class="cta-row">
-      <button class="btn-landing">
-        <span class="label">Connect wallet</span>
+      <a class="btn-landing" href="app.html#/explore">
+        <span class="label">Explore DeFi</span>
         <span class="arrow">↗</span>
-      </button>
-      <button class="btn-ghost">Launch app →</button>
+      </a>
+      <a class="btn-ghost" href="app.html#/detail">Analyze protocol →</a>
+    </div>
+
+    <div class="hero-search">
+      <span class="icon" aria-hidden="true">🔍</span>
+      <label class="sr-only" for="hero-search-input">Search protocol, vault or token</label>
+      <input id="hero-search-input" type="search" autocomplete="off"
+             placeholder="Search protocol, vault or token..." />
+      <div class="hint">12 protocols · 28 vaults indexed</div>
     </div>
   </div>
 
@@ -908,116 +891,192 @@
   </div>
 </section>
 
-<!-- How it works -->
-<section class="section-dark" id="flow" data-header-theme="dark">
+<!-- Market overview -->
+<section class="section-dark" id="market" data-header-theme="dark">
   <div class="section-head">
     <div>
-      <h2>Three contracts.<br /><em>One guarantee.</em></h2>
+      <h2>Arc market<br /><em>overview</em></h2>
     </div>
     <div class="lede-wrap">
-      <p>MandateFi separates custody, policy and execution. Each contract owns one responsibility, so the agent can never move funds the mandate did not pre-authorize — not by accident, not by exploit.</p>
+      <p>Coverage across every protocol and vault we index on Arc. Yield is split into what the protocol itself earns and what an incentive program pays on top — so you can see which half can disappear.</p>
     </div>
   </div>
 
-  <div class="flow-grid">
-    <article class="flow-card">
-      <div class="num">01 · CUSTODY</div>
-      <h3>MandateVault</h3>
-      <p>Holds your test USDC. Only you can deposit and withdraw to your own address. The vault refuses any external call that is not routed through the PolicyExecutor.</p>
-      <span class="foot">SafeERC20 · nonReentrant →</span>
-    </article>
-    <article class="flow-card">
-      <div class="num">02 · RULES</div>
-      <h3>MandateRegistry</h3>
-      <p>Stores your mandate on-chain: approved destinations, per-tx limit, daily limit, APY trigger, expiry. Pause or revoke in one transaction — the mandate stops reasoning.</p>
-      <span class="foot">Active · Paused · Revoked →</span>
-    </article>
-    <article class="flow-card">
-      <div class="num">03 · GUARD</div>
-      <h3>PolicyExecutor</h3>
-      <p>Evaluates every proposal against the mandate in a fixed, auditable order. Returns Allowed, Requires-Approval, or Denied — and emits a trace event for the UI to render.</p>
-      <span class="foot">Allowed / Approval / Denied →</span>
-    </article>
+  <div class="metric-strip">
+    <div class="metric">
+      <div class="lbl">Protocols tracked</div>
+      <div class="val"><span data-countup="12">0</span></div>
+      <div class="note">Lending markets, yield vaults and stablecoin pools.</div>
+    </div>
+    <div class="metric">
+      <div class="lbl">Vaults tracked</div>
+      <div class="val"><span data-countup="28">0</span></div>
+      <div class="note">Each one read on its own collateral and oracle setup.</div>
+    </div>
+    <div class="metric">
+      <div class="lbl">TVL monitored</div>
+      <div class="val">$<span data-countup="48">0</span><span class="unit">M</span></div>
+      <div class="note">Deposited value across all indexed markets.</div>
+    </div>
+    <div class="metric flagged">
+      <div class="lbl">Risk events</div>
+      <div class="val"><span data-countup="3">0</span></div>
+      <div class="note">Indicators that changed state in the last 7 days.</div>
+    </div>
   </div>
 </section>
 
-<!-- Two surfaces -->
-<section class="markets" id="surfaces" data-header-theme="dark">
-  <div class="markets-grid">
-    <div class="markets-rail">
-      <h2>Two surfaces,<br />one mandate,<br /><em>no surprises</em></h2>
-      <p class="source">Live state read directly from the deployed contracts on Ethereum Sepolia. Addresses and ABIs ship in the repo.</p>
+<!-- Opportunities -->
+<section class="markets" id="opportunities" data-header-theme="dark">
+  <div class="section-head">
+    <div>
+      <h2>Explore<br /><em>opportunities</em></h2>
     </div>
-
-    <div class="markets-cards">
-      <article class="mcard one">
-        <div class="idx">01</div>
-        <div class="status">Ethereum Sepolia</div>
-        <div class="ident">Mandate Vault</div>
-        <p class="desc">Your deposit lives here. Withdrawals are always available to you, even when the mandate is paused or revoked.</p>
-        <div class="big-stat">
-          <div class="lbl">Total deposits</div>
-          <div class="val"><span data-countup="12480">0</span><span class="unit">USDC</span></div>
-        </div>
-        <div class="foot">Custody separated from execution · circuit-broken by `nonReentrant`</div>
-      </article>
-
-      <article class="mcard two">
-        <div class="idx">02</div>
-        <div class="status">Ethereum Sepolia</div>
-        <div class="ident">Policy Executor</div>
-        <p class="desc">Checks every agent proposal against the mandate in a fixed order and halts at the first violated rule.</p>
-        <div class="big-stat">
-          <div class="lbl">Proposals evaluated · 24h</div>
-          <div class="val"><span data-countup="1207">0</span><span class="unit">traces</span></div>
-        </div>
-        <div class="foot">99.4% returned a verdict in under one block · zero mandate overruns</div>
-      </article>
+    <div class="lede-wrap">
+      <p>We do not reduce a market to a single &ldquo;low risk&rdquo; badge. Each card lists the specific indicators we found, so you decide which ones you are willing to carry.</p>
     </div>
+  </div>
+
+  <div class="opp-cat">
+    <h3>USDC Lending</h3>
+    <span class="count">3 markets</span>
+  </div>
+
+  <div class="opp-grid">
+    <article class="opp-card">
+      <div class="name">Protocol A</div>
+      <div class="venue">Arc · Lending pool</div>
+      <div class="opp-metrics">
+        <div class="opp-metric lead">
+          <span class="k">APY</span>
+          <span class="v">5.4%</span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">Organic APY</span>
+          <span class="v">4.8%<span class="delta">+0.6% incentives</span></span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">TVL</span>
+          <span class="v">$12M</span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">Risk indicators</span>
+          <span class="v">2</span>
+        </div>
+      </div>
+      <div class="risk-flags">
+        <div class="risk-flag">Price comes from a single oracle feed with no fallback.</div>
+        <div class="risk-flag">Contracts are upgradeable by a 2-of-5 multisig.</div>
+      </div>
+      <div class="act">
+        <a class="act-link" href="app.html#/detail">View analysis <span>→</span></a>
+      </div>
+    </article>
+
+    <article class="opp-card">
+      <div class="name">Protocol B</div>
+      <div class="venue">Arc · Yield vault</div>
+      <div class="opp-metrics">
+        <div class="opp-metric lead">
+          <span class="k">APY</span>
+          <span class="v">8.9%</span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">Organic APY</span>
+          <span class="v">3.1%<span class="delta">+5.8% incentives</span></span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">TVL</span>
+          <span class="v">$6.4M</span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">Risk indicators</span>
+          <span class="v">3</span>
+        </div>
+      </div>
+      <div class="risk-flags">
+        <div class="risk-flag severe">65% of the APY is paid in incentive tokens; the program ends in 18 days.</div>
+        <div class="risk-flag">Top three depositors hold 58% of TVL.</div>
+        <div class="risk-flag">No audit published since the v2 rewrite.</div>
+      </div>
+      <div class="act">
+        <a class="act-link" href="app.html#/detail">View analysis <span>→</span></a>
+      </div>
+    </article>
+
+    <article class="opp-card">
+      <div class="name">Protocol C</div>
+      <div class="venue">Arc · Stablecoin pool</div>
+      <div class="opp-metrics">
+        <div class="opp-metric lead">
+          <span class="k">APY</span>
+          <span class="v">4.1%</span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">Organic APY</span>
+          <span class="v">4.1%<span class="delta">no incentives</span></span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">TVL</span>
+          <span class="v">$29M</span>
+        </div>
+        <div class="opp-metric">
+          <span class="k">Risk indicators</span>
+          <span class="v">1</span>
+        </div>
+      </div>
+      <div class="risk-flags">
+        <div class="risk-flag clear">Yield is fully organic — nothing in the APY expires.</div>
+        <div class="risk-flag">Withdrawals queue once utilisation passes 95%.</div>
+      </div>
+      <div class="act">
+        <a class="act-link" href="app.html#/detail">View analysis <span>→</span></a>
+      </div>
+    </article>
   </div>
 </section>
 
 <!-- Principles -->
-<section class="principles" id="principles" data-header-theme="light">
+<section class="principles" id="method" data-header-theme="light">
   <div class="section-head">
     <div>
-      <h2>What we<br /><em>will not break</em></h2>
+      <h2>How we<br /><em>read a market</em></h2>
     </div>
     <div class="lede-wrap">
-      <p>Six non-negotiables encoded directly into the contracts. Not conventions, not comments — Solidity rules the agent cannot bypass.</p>
+      <p>Six rules behind every number on this site. They exist so you can disagree with us: if you can see how a figure was built, you can judge whether it matters to you.</p>
     </div>
   </div>
 
   <div class="principle-grid">
     <div class="principle-cell">
       <div class="pnum">01</div>
-      <h3>Agents never hold your keys</h3>
-      <p>An agent is just an on-chain address with the right to propose. All sensitive actions require your signature from your own Sepolia wallet.</p>
+      <h3>No single risk score</h3>
+      <p>We never collapse a market into one grade. A score hides the one detail that would have changed your mind, so we list indicators individually instead.</p>
     </div>
     <div class="principle-cell">
       <div class="pnum">02</div>
-      <h3>Withdrawals are always yours</h3>
-      <p>You can withdraw your deposit at any time, including while the mandate is paused, revoked, or expired. Custody is independent of policy.</p>
+      <h3>Yield is split at the source</h3>
+      <p>Every APY is broken into what the protocol earns and what an incentive program pays. The second part has an end date, and we show it.</p>
     </div>
     <div class="principle-cell">
       <div class="pnum">03</div>
-      <h3>Per-tx and daily limits are hard caps</h3>
-      <p>Every proposal is bounded by `perTxLimit` and `dailyLimit`. The daily window resets on-chain — not off-chain, not by the agent.</p>
+      <h3>Indicators are named, not ranked</h3>
+      <p>&ldquo;Single oracle feed&rdquo; and &ldquo;upgradeable by multisig&rdquo; are facts. Which one is worse depends on your position size and horizon, not on our weighting.</p>
     </div>
     <div class="principle-cell">
       <div class="pnum">04</div>
-      <h3>Approved destinations only</h3>
-      <p>Funds cannot flow to an address outside your pre-approved set. Adding a destination is an on-chain transaction signed by you.</p>
+      <h3>Every figure traces to a source</h3>
+      <p>TVL, utilisation and rates are read on-chain. Each one links back to the contract and block it came from, so you can verify it yourself.</p>
     </div>
     <div class="principle-cell">
       <div class="pnum">05</div>
-      <h3>Pause stops thinking, not escape</h3>
-      <p>Pause and revoke are instant. New proposals are denied immediately, but you keep every right to move your capital.</p>
+      <h3>We track change, not snapshots</h3>
+      <p>A market that quietly doubled its incentive share last week is a different market. Indicators carry the date they changed state.</p>
     </div>
     <div class="principle-cell">
       <div class="pnum">06</div>
-      <h3>Every verdict is traceable</h3>
-      <p>Each evaluation emits an event with the rule hit, the amount, the destination, and the timestamp. Nothing happens without a receipt.</p>
+      <h3>We say what we cannot see</h3>
+      <p>Off-chain custody, unpublished audits and admin intent are not observable. We mark them as unknown rather than scoring them as safe.</p>
     </div>
   </div>
 </section>
@@ -1028,33 +1087,33 @@
 
   <div class="faq-list">
     <details class="faq-item" open>
-      <summary><span>IS MANDATEFI AUDITED OR PRODUCTION-READY?</span><span class="plus">+</span></summary>
+      <summary><span>WHY IS THERE NO LOW / HIGH RISK LABEL?</span><span class="plus">+</span></summary>
       <div class="answer">
-        No. MandateFi is a testnet MVP running on Ethereum Sepolia. The yield oracle is owner-updated for demos and the agent runner is an off-chain script. Marked with <code>// RIALO:</code> in the source wherever a native primitive will replace a shortcut. Do not deposit real funds.
+        Because a single label would be ours, not yours. A market with one oracle feed may be fine for a small position held for a week and unacceptable for a large one held for a year. We publish the indicators we found and let you weigh them against your own position.
       </div>
     </details>
     <details class="faq-item">
-      <summary><span>WHY ETHEREUM SEPOLIA AND NOT RIALO?</span><span class="plus">+</span></summary>
+      <summary><span>WHAT IS ORGANIC APY?</span><span class="plus">+</span></summary>
       <div class="answer">
-        Rialo does not yet have a public deployment environment. Sepolia lets us demonstrate the policy enforcement model today with a Circle-issued test USDC, while reserving the native-webcall and native-timer paths for a Rialo port once it is available.
+        The part of the yield the protocol produces on its own — borrower interest, trading fees, real revenue. The rest is paid from an incentive program and stops when that program ends. If headline APY is 8.9% and organic APY is 3.1%, then 5.8% of your return has an expiry date.
       </div>
     </details>
     <details class="faq-item">
-      <summary><span>CAN THE AGENT CHANGE MY MANDATE?</span><span class="plus">+</span></summary>
+      <summary><span>WHERE DOES THE DATA COME FROM?</span><span class="plus">+</span></summary>
       <div class="answer">
-        No. Mandate mutation is restricted to the owner at the Solidity level with custom errors. The agent can only submit proposals; the registry is write-protected against the agent address by `onlyOwner` checks.
+        Rates, TVL and utilisation are read directly from the protocol contracts on Arc. Audit status and admin configuration are compiled from published sources and labelled with the date we checked. Anything we cannot observe on-chain is marked unknown rather than assumed safe.
       </div>
     </details>
     <details class="faq-item">
-      <summary><span>WHAT HAPPENS WHEN A PROPOSAL IS DENIED?</span><span class="plus">+</span></summary>
+      <summary><span>WHAT COUNTS AS A RISK EVENT?</span><span class="plus">+</span></summary>
       <div class="answer">
-        The call reverts with a typed custom error — e.g. <code>ExceedsPerTxLimit(amount, limit)</code> or <code>DestinationNotApproved(address)</code>. The frontend decodes the selector and renders a plain-English reason in the policy trace. No funds move.
+        An indicator changing state — an incentive program announcing an end date, TVL concentration crossing a threshold, a contract being upgraded, or an oracle changing its source. We record the change and the block it happened in, not just the current value.
       </div>
     </details>
     <details class="faq-item">
-      <summary><span>HOW DO I GET TEST USDC?</span><span class="plus">+</span></summary>
+      <summary><span>DO YOU TELL ME WHERE TO DEPOSIT?</span><span class="plus">+</span></summary>
       <div class="answer">
-        Request from the Circle Sepolia faucet. The vault accepts Circle's issued USDC at <code>0x1c7D…7238</code>. Gas is paid in Sepolia ETH, which you can obtain from standard faucets.
+        No. We do not rank markets, recommend allocations, or sell placement. The product's job is to make the trade-offs visible before you commit capital. The deposit decision stays with you, and so does the outcome.
       </div>
     </details>
   </div>
@@ -1063,18 +1122,18 @@
 <!-- CTA -->
 <section class="cta-section" data-header-theme="light">
   <div>
-    <div class="cta-copy">Ready when you are · Sepolia only</div>
-    <h2>Write a mandate.<br /><em>Keep the keys.</em></h2>
+    <div class="cta-copy">12 protocols · 28 vaults · indexed on Arc</div>
+    <h2>Look first.<br /><em>Then deposit.</em></h2>
   </div>
   <div class="cta-buttons">
-    <button class="btn-landing btn-landing-dark">
-      <span class="label">Connect wallet</span>
+    <a class="btn-landing btn-landing-dark" href="app.html#/explore">
+      <span class="label">Explore DeFi</span>
       <span class="arrow">↗</span>
-    </button>
-    <button class="btn-landing btn-landing-light">
-      <span class="label">Launch app</span>
+    </a>
+    <a class="btn-landing btn-landing-light" href="app.html#/methodology">
+      <span class="label">Read the method</span>
       <span class="arrow">↗</span>
-    </button>
+    </a>
   </div>
 </section>
 
@@ -1089,26 +1148,26 @@
     <div>
       <div class="col-heading">About</div>
       <p class="footer-note">
-        A policy-controlled DeFi vault. Agents manage USDC only within the limits you approve on-chain. Built on Ethereum Sepolia, designed with Rialo primitives in mind.
-        <span class="chip"><span class="dot"></span>Sepolia · live</span>
+        DeFi risk analytics for stablecoin depositors. We show where a yield comes from and which risks sit behind it — without reducing any market to a single score.
+        <span class="chip"><span class="dot"></span>Arc · indexing</span>
       </p>
     </div>
     <div>
-      <div class="col-heading">Protocol</div>
+      <div class="col-heading">Product</div>
       <ul>
-        <li><a href="#">Mandate Vault</a></li>
-        <li><a href="#">Policy Executor</a></li>
-        <li><a href="#">Mandate Registry</a></li>
-        <li><a href="#">Deployments</a></li>
+        <li><a href="app.html#/explore">Explore</a></li>
+        <li><a href="app.html#/compare">Compare</a></li>
+        <li><a href="app.html#/portfolio">Portfolio</a></li>
+        <li><a href="app.html#/alerts">Risk alerts</a></li>
       </ul>
     </div>
     <div>
-      <div class="col-heading">Docs</div>
+      <div class="col-heading">Method</div>
       <ul>
-        <li><a href="#">Spec</a></li>
-        <li><a href="#">Mandate schema</a></li>
-        <li><a href="#">Policy rules</a></li>
-        <li><a href="#">Security</a></li>
+        <li><a href="app.html#/methodology">Methodology</a></li>
+        <li><a href="#method">Risk indicators</a></li>
+        <li><a href="#faq">Organic APY</a></li>
+        <li><a href="#market">Data sources</a></li>
       </ul>
     </div>
     <div>
@@ -1117,7 +1176,7 @@
         <li><a href="#">GitHub</a></li>
         <li><a href="#">X / Twitter</a></li>
         <li><a href="#">Discord</a></li>
-        <li><a href="#">Rialo thesis</a></li>
+        <li><a href="#">Contact</a></li>
       </ul>
     </div>
   </div>
