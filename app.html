@@ -766,6 +766,128 @@
     .conc-row { grid-template-columns: 64px 1fr 46px; }
   }
 
+  /* ───── Methodology ───── */
+  .meth-lede {
+    max-width: 680px; margin-bottom: 22px;
+    font-size: 1.02rem; line-height: 1.6;
+  }
+  .meth-lede .strike {
+    display: block; margin-bottom: 12px;
+    font-size: 0.92rem; color: var(--color-text-secondary);
+  }
+  .meth-lede .strike q { text-decoration: line-through; opacity: 0.75; }
+  .meth-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    margin-bottom: 20px; padding: 13px 18px;
+    border: 1px solid var(--color-border); border-radius: 11px;
+    background: rgba(22, 18, 31, 0.55);
+  }
+  .meth-bar .refreshed {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.05em; color: var(--color-text-secondary);
+  }
+  .meth-bar .refreshed strong { color: var(--color-text-primary); font-weight: 500; }
+  .src-key { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Source is encoded by fill and glyph, not hue — the status colours stay
+     reserved for severity elsewhere in the app. */
+  .src {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 3px 10px; border-radius: 999px;
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .src .g { font-size: 0.72rem; line-height: 1; }
+  .src.onchain {
+    background: var(--color-surface-hover);
+    border: 1px solid rgba(232, 227, 213, 0.3);
+    color: var(--color-text-primary);
+  }
+  .src.external {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+  }
+  .src.derived {
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    color: var(--color-text-secondary);
+  }
+
+  .sig-wrap { overflow-x: auto; }
+  .sig-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .sig-table th, .sig-table td {
+    padding: 12px 18px; text-align: left; vertical-align: top;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .sig-table thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-mono); font-size: 0.64rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .sig-table tr.group td {
+    padding-top: 26px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    background: transparent;
+  }
+  .sig-table tr.group:first-child td { padding-top: 14px; }
+  .sig-group-label { display: flex; align-items: baseline; gap: 12px; }
+  .sig-group-label .n {
+    font-family: var(--font-mono); font-size: 0.82rem;
+    color: var(--color-accent); opacity: 0.8;
+  }
+  .sig-group-label .t {
+    font-size: 0.95rem; font-weight: 600;
+    letter-spacing: 0.02em; text-transform: uppercase;
+  }
+  .sig-table .nm { font-size: 0.88rem; font-weight: 500; white-space: nowrap; }
+  .sig-table .rd { font-size: 0.84rem; line-height: 1.5; color: var(--color-text-secondary); }
+  .sig-table .up {
+    font-family: var(--font-mono); font-size: 0.76rem;
+    color: var(--color-text-secondary); white-space: nowrap;
+  }
+  .sig-table tbody tr:last-child td { border-bottom: none; }
+
+  /* ───── MVP flow ───── */
+  .flow { display: grid; gap: 0; justify-items: center; }
+  .flow-step {
+    width: 100%; max-width: 440px;
+    display: grid; grid-template-columns: 30px 1fr auto;
+    align-items: center; gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid var(--color-border); border-radius: 11px;
+    background: linear-gradient(150deg, var(--color-surface) 0%, rgba(22, 18, 31, 0.72) 100%);
+    text-align: left;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  a.flow-step:hover, button.flow-step:hover {
+    border-color: var(--color-accent); transform: translateY(-1px);
+  }
+  .flow-step .n {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    color: var(--color-text-secondary);
+  }
+  .flow-step .t { font-size: 0.92rem; font-weight: 500; }
+  .flow-step .go { color: var(--color-text-secondary); font-size: 0.85rem; }
+  .flow-step.wide { max-width: 560px; }
+  .flow-step.static { background: transparent; border-style: dashed; }
+  .flow-link { width: 1px; height: 22px; background: var(--color-border); }
+  .flow-facets {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    grid-column: 1 / -1; margin-top: 4px;
+  }
+  .flow-facet {
+    padding: 4px 11px; border-radius: 999px;
+    border: 1px solid var(--color-border); background: var(--color-bg);
+    font-family: var(--font-mono); font-size: 0.66rem;
+    letter-spacing: 0.06em; color: var(--color-text-secondary);
+  }
+
   /* ───── Risk monitor ─────
      Three severity levels on two hues. A third hue between #E5484D and
      #E8B54C cannot clear the normal-vision separation floor — red, orange and
@@ -2200,16 +2322,73 @@
     <section class="view" data-view="methodology">
       <div class="page-head">
         <div>
-          <h1>Methodology</h1>
-          <div class="sub">How metrics and risk scores are calculated</div>
+          <h1>How ArcShield analyzes DeFi</h1>
+          <div class="sub">Every signal we read, where it comes from, and when we last read it</div>
         </div>
       </div>
 
-      <div class="placeholder">
-        <div class="ph-mark">Methodology</div>
-        <h4>Scoring and data sources</h4>
-        <p>Formulas, data sources and assumptions behind every number go here.</p>
+      <div class="meth-lede">
+        <span class="strike">We do not tell you <q>this protocol is risky</q> and leave it there.</span>
+        A verdict you cannot audit is just our opinion wearing a number. Below is the full
+        list of what we look at — so you can check our reading, or disagree with it.
       </div>
+
+      <div class="meth-bar">
+        <span class="refreshed">Last full refresh <strong>2026-10-03 14:12 UTC</strong> · block <strong>4,812,655</strong></span>
+        <span class="src-key">
+          <span class="src onchain"><span class="g" aria-hidden="true">◆</span>On-chain</span>
+          <span class="src external"><span class="g" aria-hidden="true">◇</span>External</span>
+          <span class="src derived"><span class="g" aria-hidden="true">ƒ</span>Derived</span>
+        </span>
+      </div>
+
+      <div class="glass sig-wrap">
+        <table class="sig-table">
+          <thead>
+            <tr>
+              <th>Signal</th>
+              <th>What we read</th>
+              <th>Source</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="meth-body"></tbody>
+        </table>
+      </div>
+
+      <div class="know" style="margin-top: 22px;">
+        <h3>What we do not do</h3>
+        <div class="sub">The three things that would make everything above meaningless</div>
+        <div class="know-list">
+          <div class="know-item warn">
+            <span class="mark" aria-hidden="true">⚠</span>
+            <div>
+              <div class="txt">We do not publish a single risk score.</div>
+              <div class="why">Collapsing these signals into one grade hides the one that would have changed your mind. Weighting them is your job, not ours.</div>
+            </div>
+          </div>
+          <div class="know-item warn">
+            <span class="mark" aria-hidden="true">⚠</span>
+            <div>
+              <div class="txt">We do not rank protocols or recommend allocations.</div>
+              <div class="why">No "best vault" list, no default sort by APY. The order you see reflects the filter you chose.</div>
+            </div>
+          </div>
+          <div class="know-item good">
+            <span class="mark" aria-hidden="true">✓</span>
+            <div>
+              <div class="txt">We do not sell placement, and we mark what we cannot see.</div>
+              <div class="why">No protocol pays to appear here. Off-chain custody, unpublished audits and admin intent are labelled unknown rather than assumed safe.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pf-section-head" style="margin-top: 30px;">
+        <h2>Where each signal appears</h2>
+        <span class="sub">The path through the product · click a step to open it</span>
+      </div>
+      <div class="flow" id="meth-flow"></div>
     </section>
   </main>
 </div>
@@ -2675,6 +2854,118 @@
     btn.addEventListener('click', () => Store.toggle(btn.dataset.cmp));
     Store.onChange(sync);
     sync();
+  })();
+
+  // ─── Methodology: signal inventory and product flow ───
+  (function () {
+    const tbody = document.getElementById('meth-body');
+    if (!tbody) return;
+
+    const h = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+
+    // Each row names its source and its freshness, because a signal is only
+    // worth as much as the reader's ability to check where it came from.
+    const SRC = {
+      onchain: ['◆', 'On-chain'],
+      external: ['◇', 'External'],
+      derived: ['ƒ', 'Derived'],
+    };
+
+    const GROUPS = [
+      { n: '01', title: 'Security', rows: [
+        ['Audit', 'Published reports, the firm, the date, and which version was reviewed', 'external', 'Checked 2026-10-01'],
+        ['Contract verification', 'Deployed bytecode matched against published source', 'onchain', 'Live'],
+        ['Upgradeability', 'Proxy pattern, and whether an implementation slot can be rewritten', 'onchain', 'Live'],
+      ] },
+      { n: '02', title: 'Liquidity', rows: [
+        ['TVL', 'Token balance held by the vault contract', 'onchain', 'Live'],
+        ['Available liquidity', 'Balance not lent out — what could be withdrawn this block', 'onchain', 'Live'],
+        ['Utilization', 'Borrowed divided by supplied', 'derived', 'Live'],
+      ] },
+      { n: '03', title: 'Admin control', rows: [
+        ['Owner', 'The address in the owner slot, and whether it is an EOA or a contract', 'onchain', 'Live'],
+        ['Multisig', 'Signer count and the threshold required to execute', 'onchain', 'Live'],
+        ['Timelock', 'Delay enforced between a queued change and its execution', 'onchain', 'Live'],
+        ['Contract permissions', 'Which role can upgrade, pause, change parameters or mint', 'onchain', 'Live'],
+      ] },
+      { n: '04', title: 'Concentration', rows: [
+        ['Depositor concentration', 'Share of deposits held by the largest wallets', 'onchain', 'Hourly'],
+        ['Liquidity concentration', 'Whether withdrawable funds would cover the largest holders leaving', 'derived', 'Hourly'],
+      ] },
+      { n: '05', title: 'Yield', rows: [
+        ['Base yield', 'Rate the protocol pays out of its own revenue', 'onchain', 'Live'],
+        ['Borrow yield', 'Borrow rate applied across current utilization', 'derived', 'Live'],
+        ['Incentives', 'Emission rate on-chain; program end date from the published schedule', 'external', 'Daily'],
+        ['Yield sustainability', 'Organic share of APY, and what is left if incentives stop', 'derived', 'Live'],
+      ] },
+    ];
+
+    GROUPS.forEach(g => {
+      const gr = h('tr', 'group');
+      const gtd = h('td');
+      gtd.setAttribute('colspan', '4');
+      const label = h('div', 'sig-group-label');
+      label.append(h('span', 'n', g.n), h('span', 't', g.title));
+      gtd.appendChild(label);
+      gr.appendChild(gtd);
+      tbody.appendChild(gr);
+
+      g.rows.forEach(([name, reads, src, updated]) => {
+        const tr = h('tr');
+        tr.appendChild(h('td', 'nm', name));
+        tr.appendChild(h('td', 'rd', reads));
+
+        const srcTd = h('td');
+        const badge = h('span', 'src ' + src);
+        const glyph = h('span', 'g', SRC[src][0]);
+        glyph.setAttribute('aria-hidden', 'true');
+        badge.append(glyph, document.createTextNode(SRC[src][1]));
+        srcTd.appendChild(badge);
+        tr.appendChild(srcTd);
+
+        tr.appendChild(h('td', 'up', updated));
+        tbody.appendChild(tr);
+      });
+    });
+
+    // ── the path through the product, doubling as navigation ──
+    const FLOW = [
+      { n: '01', t: 'Home', href: 'index.html' },
+      { n: '02', t: 'Explore', view: 'explore' },
+      { n: '03', t: 'USDC vault', view: 'detail' },
+      { n: '04', t: 'Protocol analysis', view: 'detail', wide: true,
+        facets: ['Yield', 'Liquidity', 'Security', 'Admin', 'Concentration'] },
+      { n: '05', t: 'Compare', view: 'compare' },
+      { n: '06', t: 'Deposit', note: 'on the protocol page' },
+      { n: '07', t: 'Portfolio', view: 'portfolio' },
+      { n: '08', t: 'Risk monitor', view: 'alerts' },
+    ];
+
+    const flow = document.getElementById('meth-flow');
+    FLOW.forEach((step, i) => {
+      if (i) flow.appendChild(h('div', 'flow-link'));
+
+      const interactive = step.href || step.view;
+      const el = step.href ? h('a') : interactive ? h('button') : h('div');
+      el.className = 'flow-step' + (step.wide ? ' wide' : '') + (interactive ? '' : ' static');
+      if (step.href) el.setAttribute('href', step.href);
+      if (step.view) el.dataset.view = step.view;
+
+      el.append(h('span', 'n', step.n), h('span', 't', step.t));
+      el.appendChild(h('span', 'go', interactive ? '→' : step.note));
+
+      if (step.facets) {
+        const row = h('div', 'flow-facets');
+        step.facets.forEach(f => row.appendChild(h('span', 'flow-facet', f)));
+        el.appendChild(row);
+      }
+      flow.appendChild(el);
+    });
   })();
 
   // ─── Risk monitor: event feed ───
