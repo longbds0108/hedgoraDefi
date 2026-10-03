@@ -823,6 +823,13 @@
   .dep-swing strong { color: var(--color-warning); }
 
   /* ───── Compare table ───── */
+  .cmp-sample {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    margin-bottom: 16px; padding: 12px 16px;
+    border: 1px dashed var(--color-border); border-radius: 10px;
+    font-size: 0.85rem; color: var(--color-text-secondary);
+  }
   .cmp-wrap {
     overflow-x: auto;
     border: 1px solid var(--color-border); border-radius: 14px;
@@ -913,7 +920,6 @@
     font-size: 1.02rem; font-weight: 600;
     color: var(--color-text-primary);
   }
-  .placeholder .btn { margin-top: 20px; }
   .placeholder p {
     margin: 0 auto;
     max-width: 440px;
@@ -2833,24 +2839,26 @@
     }
 
     const resetBtn = document.getElementById('cmp-reset');
+    // With nothing picked the page shows a worked example rather than an empty
+    // prompt — the comparison only makes its point once there is a table to read.
+    const SAMPLE = ['Protocol A', 'Protocol B', 'Protocol C'];
 
     function render() {
-      const rows = Store.picked;
-      body.textContent = '';
-      resetBtn.disabled = rows.length === 0;
+      const picked = Store.picked;
+      const isSample = picked.length === 0;
+      const rows = isSample ? SAMPLE.map(n => Store.DATA.find(d => d.name === n)) : picked;
 
-      if (!rows.length) {
-        const empty = h('div', 'placeholder');
-        empty.append(
-          h('div', 'ph-mark', 'Compare'),
-          h('h4', null, 'Nothing selected yet'),
-          h('p', null, `Pick up to ${Store.MAX} opportunities in Explore and they line up here across the same metrics.`),
-        );
-        const btn = h('button', 'btn btn-primary btn-sm', 'Go to Explore →');
-        btn.dataset.view = 'explore';
-        empty.appendChild(btn);
-        body.appendChild(empty);
-        return;
+      body.textContent = '';
+      resetBtn.disabled = isSample;
+
+      if (isSample) {
+        const banner = h('div', 'cmp-sample');
+        banner.appendChild(h('span', null,
+          'Showing a sample comparison. Pick up to 3 in Explore to compare your own.'));
+        const go = h('button', 'btn btn-ghost btn-sm', 'Choose in Explore →');
+        go.dataset.view = 'explore';
+        banner.appendChild(go);
+        body.appendChild(banner);
       }
 
       const wrap = h('div', 'cmp-wrap');
@@ -2866,10 +2874,13 @@
         const head = h('div', 'cmp-head');
         const ident = h('div');
         ident.append(h('div', 'nm', d.name), h('div', 'kind', d.label));
-        const rm = h('button', 'rm', '✕');
-        rm.setAttribute('aria-label', 'Remove ' + d.name);
-        rm.dataset.rm = d.name;
-        head.append(ident, rm);
+        head.appendChild(ident);
+        if (!isSample) {
+          const rm = h('button', 'rm', '✕');
+          rm.setAttribute('aria-label', 'Remove ' + d.name);
+          rm.dataset.rm = d.name;
+          head.appendChild(rm);
+        }
         th.appendChild(head);
         hr.appendChild(th);
       });
@@ -2951,9 +2962,11 @@
       const panel = h('div', 'know');
       panel.append(
         h('h3', null, 'What stands out'),
-        h('div', 'sub', rows.length === 1
-          ? 'Add a second opportunity to see these side by side.'
-          : `Readings across the ${rows.length} selected opportunities — not a recommendation.`),
+        h('div', 'sub', isSample
+          ? 'Readings across the three sample opportunities — not a recommendation.'
+          : rows.length === 1
+            ? 'Add a second opportunity to see these side by side.'
+            : `Readings across the ${rows.length} selected opportunities — not a recommendation.`),
       );
       const ul = h('div', 'know-list');
       obs.forEach(o => {
