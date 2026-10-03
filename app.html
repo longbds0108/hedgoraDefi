@@ -766,6 +766,109 @@
     .conc-row { grid-template-columns: 64px 1fr 46px; }
   }
 
+  /* ───── Risk monitor ─────
+     Three severity levels on two hues. A third hue between #E5484D and
+     #E8B54C cannot clear the normal-vision separation floor — red, orange and
+     amber are too close — so the third level drops to the neutral border
+     colour and a hollow dot, and every level also carries a text label. */
+  .alert-top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .alert-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mine-toggle {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 0.84rem; cursor: pointer;
+    color: var(--color-text-secondary);
+  }
+  .mine-toggle input { accent-color: var(--color-accent); width: 15px; height: 15px; cursor: pointer; }
+
+  .alert-list { display: grid; gap: 14px; }
+  .alert {
+    display: grid; gap: 12px;
+    padding: 18px 20px 17px;
+    background: linear-gradient(160deg, var(--color-surface) 0%, rgba(22, 18, 31, 0.78) 100%);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-border);
+    border-radius: 12px;
+    transition: border-color .25s ease;
+  }
+  .alert.critical { border-left-color: var(--color-danger); }
+  .alert.serious { border-left-color: var(--color-warning); }
+  .alert-head {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .sev {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 3px 9px 3px 8px; border-radius: 999px;
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+    letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .sev .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .alert.critical .sev {
+    color: var(--color-danger);
+    border-color: rgba(229, 72, 77, 0.4); background: rgba(229, 72, 77, 0.1);
+  }
+  .alert.critical .sev .dot { background: var(--color-danger); }
+  .alert.serious .sev {
+    color: var(--color-warning);
+    border-color: rgba(232, 181, 76, 0.4); background: rgba(232, 181, 76, 0.1);
+  }
+  .alert.serious .sev .dot { background: var(--color-warning); }
+  /* watch: hollow dot on the neutral chrome — the level with no hue of its own */
+  .alert.watch .sev .dot {
+    background: transparent;
+    border: 2px solid var(--color-warning);
+  }
+  .alert-kind { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.01em; }
+  .alert-who {
+    padding: 3px 10px; border-radius: 999px;
+    border: 1px solid var(--color-border); background: var(--color-bg);
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.05em; color: var(--color-text-secondary);
+  }
+  .alert-when {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--color-text-secondary); white-space: nowrap;
+  }
+  .mine-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px;
+    border: 1px solid rgba(121, 106, 230, 0.45);
+    background: rgba(121, 106, 230, 0.12);
+    font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: #A79BF0;
+  }
+  .alert-msg { font-size: 0.95rem; line-height: 1.5; }
+  .alert-msg .who { font-weight: 600; }
+  .alert-msg .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .alert-why {
+    padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.055);
+    font-size: 0.85rem; line-height: 1.55; color: var(--color-text-secondary);
+  }
+  .alert-why strong { color: var(--color-text-primary); font-weight: 500; }
+  .alert-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .notify-note {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    margin-top: 22px; padding: 15px 18px;
+    border: 1px dashed var(--color-border); border-radius: 11px;
+    font-size: 0.85rem; color: var(--color-text-secondary);
+  }
+  .notify-note .soon {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+    padding: 4px 10px; border: 1px solid var(--color-border); border-radius: 999px;
+  }
+
   /* ───── Portfolio ───── */
   .pf-hero {
     display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
@@ -2062,18 +2165,34 @@
     <section class="view" data-view="alerts">
       <div class="page-head">
         <div>
-          <h1>Risk alerts</h1>
-          <div class="sub">Threshold breaches and health warnings</div>
+          <h1>Risk Monitor</h1>
+          <div class="sub">State changes we detected across the protocols we index</div>
         </div>
         <div class="page-head-actions">
-          <button class="btn btn-ghost btn-sm">Alert settings</button>
+          <button class="btn btn-ghost btn-sm">Refresh ↻</button>
         </div>
       </div>
 
-      <div class="placeholder">
-        <div class="ph-mark">Risk alerts</div>
-        <h4>Alert feed</h4>
-        <p>Triggered alerts, severity levels and notification rules go here.</p>
+      <div class="stat-grid" id="ra-summary"></div>
+
+      <div class="alert-top-bar">
+        <div class="alert-filters" id="ra-filters">
+          <button class="filter-chip on" data-sev="all">All</button>
+          <button class="filter-chip" data-sev="critical">Critical</button>
+          <button class="filter-chip" data-sev="serious">Serious</button>
+          <button class="filter-chip" data-sev="watch">Watch</button>
+        </div>
+        <label class="mine-toggle">
+          <input type="checkbox" id="ra-mine" />
+          <span>Only protocols I hold</span>
+        </label>
+      </div>
+
+      <div class="alert-list" id="ra-list"></div>
+
+      <div class="notify-note">
+        <span>Alerts live on this page for now. Telegram, Discord and email delivery are not wired up yet.</span>
+        <span class="soon">Coming later</span>
       </div>
     </section>
 
@@ -2556,6 +2675,131 @@
     btn.addEventListener('click', () => Store.toggle(btn.dataset.cmp));
     Store.onChange(sync);
     sync();
+  })();
+
+  // ─── Risk monitor: event feed ───
+  (function () {
+    const list = document.getElementById('ra-list');
+    if (!list) return;
+
+    // Protocols the wallet holds — the same three the Portfolio page reports.
+    const HELD = ['Protocol A', 'Protocol B', 'Protocol C'];
+
+    // Five event types. Figures line up with Store: Protocol B really does sit
+    // at 8.90% APY with $0.9M available, so the alert and the card agree.
+    const EVENTS = [
+      {
+        sev: 'critical', kind: 'Contract changed', protocol: 'Protocol X', when: '2h ago',
+        msg: 'The implementation contract was replaced with a new address.',
+        why: 'The code holding deposits was replaced by the admin key. An audit of the previous version no longer describes what is running.',
+      },
+      {
+        sev: 'serious', kind: 'Liquidity', protocol: 'Protocol B', when: '6h ago',
+        msg: 'Available liquidity decreased 32%, from $1.3M to $0.9M.',
+        why: 'Withdrawable funds are now 14% of deposits. Your $960 position would exit fine alone, but not if larger depositors move first.',
+      },
+      {
+        sev: 'serious', kind: 'Yield', protocol: 'Protocol B', when: '1d ago',
+        msg: 'APY decreased from 12.40% to 8.90%.',
+        why: 'The reward rate was cut, not the borrow demand. Your $960 now earns about $85 a year instead of $119.',
+      },
+      {
+        sev: 'watch', kind: 'Incentives', protocol: 'Protocol F', when: '2d ago',
+        msg: 'Token rewards end in 4 days.',
+        why: '75% of this vault’s 11.40% APY is incentive-paid. When the program stops, the yield left is 2.80%.',
+      },
+      {
+        sev: 'watch', kind: 'Concentration', protocol: 'Protocol E', when: '3d ago',
+        msg: 'Top 5 wallets now control 52% of deposits.',
+        why: 'Up from 44% last week. A coordinated exit by those five would exceed the liquidity available today.',
+      },
+    ];
+
+    const SEV_LABEL = { critical: 'Critical', serious: 'Serious', watch: 'Watch' };
+
+    const h = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+
+    const filters = document.getElementById('ra-filters');
+    const mineOnly = document.getElementById('ra-mine');
+
+    // severity counts as a KPI row
+    const summary = document.getElementById('ra-summary');
+    [
+      ['Open alerts', EVENTS.length, 'Across all indexed protocols'],
+      ['Critical', EVENTS.filter(e => e.sev === 'critical').length, 'Contract or custody changed'],
+      ['Serious', EVENTS.filter(e => e.sev === 'serious').length, 'Liquidity or yield moved'],
+      ['On your positions', EVENTS.filter(e => HELD.includes(e.protocol)).length, 'Protocols you hold'],
+    ].forEach(([label, value, note]) => {
+      const card = h('div', 'stat');
+      card.append(h('div', 'lbl', label), h('div', 'val', String(value)), h('div', 'delta', note));
+      summary.appendChild(card);
+    });
+
+    function render() {
+      const on = filters.querySelector('.filter-chip.on');
+      const sev = on ? on.dataset.sev : 'all';
+      const rows = EVENTS.filter(e =>
+        (sev === 'all' || e.sev === sev) &&
+        (!mineOnly.checked || HELD.includes(e.protocol))
+      );
+
+      list.textContent = '';
+
+      if (!rows.length) {
+        const empty = h('div', 'placeholder');
+        empty.append(
+          h('div', 'ph-mark', 'Risk monitor'),
+          h('h4', null, 'No alerts match this filter'),
+          h('p', null, 'Nothing has changed state in this category. Widen the filter to see the rest.'),
+        );
+        list.appendChild(empty);
+        return;
+      }
+
+      rows.forEach(e => {
+        const card = h('article', 'alert ' + e.sev);
+
+        const head = h('div', 'alert-head');
+        const badge = h('span', 'sev');
+        const dot = h('span', 'dot');
+        dot.setAttribute('aria-hidden', 'true');
+        badge.append(dot, document.createTextNode(SEV_LABEL[e.sev]));
+        head.append(badge, h('span', 'alert-kind', e.kind), h('span', 'alert-who', e.protocol));
+        if (HELD.includes(e.protocol)) head.appendChild(h('span', 'mine-badge', 'In your portfolio'));
+        head.appendChild(h('span', 'alert-when', e.when));
+        card.appendChild(head);
+
+        card.appendChild(h('div', 'alert-msg', e.msg));
+
+        const why = h('div', 'alert-why');
+        why.append(h('strong', null, 'Why it matters: '), document.createTextNode(e.why));
+        card.appendChild(why);
+
+        const foot = h('div', 'alert-foot');
+        const view = h('button', 'btn btn-ghost btn-sm', 'View protocol →');
+        view.dataset.view = 'detail';
+        foot.appendChild(view);
+        card.appendChild(foot);
+
+        list.appendChild(card);
+      });
+    }
+
+    filters.addEventListener('click', ev => {
+      const chip = ev.target.closest('.filter-chip');
+      if (!chip) return;
+      filters.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('on'));
+      chip.classList.add('on');
+      render();
+    });
+    mineOnly.addEventListener('change', render);
+
+    render();
   })();
 
   // ─── Portfolio: positions, exposure and yield dependency ───
