@@ -33,9 +33,9 @@
 
     /* Ordinal ramp for data provenance, most verifiable to least.
        Monotone lightness, ΔL 0.09, all three ≥ 3:1 on --color-surface. */
-    --src-1: #938AF9;
-    --src-2: #796EDA;
-    --src-3: #6052BC;
+    --src-1: #BEBCFD;
+    --src-2: #8E8CC9;
+    --src-3: #615E98;
     --font-body: 'Inter Tight', sans-serif;
   }
 
@@ -843,52 +843,63 @@
   }
   .cov-foot strong { color: var(--color-text-primary); font-weight: 500; }
 
-  /* ── the five groups as cards ── */
-  .grp-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
-    gap: 16px; margin-bottom: 22px;
-  }
-  .grp {
-    padding: 20px; border-radius: 13px;
+  /* ── the five categories as one stacked bar chart ── */
+  .cat-chart {
+    padding: 24px 26px; border-radius: 13px;
     border: 1px solid var(--color-border);
     background: rgba(22, 18, 31, 0.55);
-    transition: border-color .25s ease;
+    margin-bottom: 22px;
   }
-  .grp:hover { border-color: rgba(232, 227, 213, 0.28); }
-  .grp-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
-  .grp-head .n {
-    font-family: var(--font-mono); font-size: 0.78rem;
-    color: var(--color-accent); opacity: 0.75;
+  .cat-row {
+    display: grid; grid-template-columns: 162px 1fr 34px;
+    align-items: center; gap: 16px; padding: 10px 0;
   }
-  .grp-head .t {
-    font-size: 0.86rem; font-weight: 600;
-    letter-spacing: 0.06em; text-transform: uppercase;
-  }
-  .grp-head .c {
-    margin-left: auto;
+  .cat-name { display: flex; align-items: baseline; gap: 9px; font-size: 0.88rem; }
+  .cat-name .n {
     font-family: var(--font-mono); font-size: 0.68rem;
     color: var(--color-text-secondary);
   }
-  .grp-units { display: flex; gap: 3px; margin-bottom: 15px; }
-  .grp-units span {
-    width: 100%; height: 6px; border-radius: 3px;
-    background: var(--src-1);
+  /* 2px surface gaps separate the segments; square at the baseline, 4px at the
+     data end, so the bar reads as growing from the left */
+  .cat-track { display: flex; gap: 2px; height: 20px; }
+  .cat-track .seg {
+    height: 100%; background: var(--src-1);
+    border-radius: 0; min-width: 4px;
+    transition: filter .2s ease;
   }
-  .grp-units span.derived { background: var(--src-2); }
-  .grp-units span.external { background: var(--src-3); }
-  .grp-sig {
-    display: flex; align-items: center; gap: 9px;
-    padding: 7px 0; font-size: 0.85rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  .cat-track .seg.derived { background: var(--src-2); }
+  .cat-track .seg.external { background: var(--src-3); }
+  .cat-track .seg:last-child { border-radius: 0 4px 4px 0; }
+  .cat-track .seg:hover { filter: brightness(1.18); }
+  .cat-total {
+    text-align: right;
+    font-family: var(--font-mono); font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
   }
-  .grp-sig:last-child { border-bottom: none; }
-  .grp-sig .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; background: var(--src-1); }
-  .grp-sig .dot.derived { background: var(--src-2); }
-  .grp-sig .dot.external { background: var(--src-3); }
-  .grp-sig .fresh {
-    margin-left: auto;
+  .cat-axis {
+    display: flex; justify-content: space-between;
+    margin: 4px 0 0; padding-left: 178px;
     font-family: var(--font-mono); font-size: 0.66rem;
     color: var(--color-text-secondary);
+  }
+  .cat-legend {
+    display: flex; gap: 10px 22px; flex-wrap: wrap;
+    margin-top: 18px; padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+  .cat-legend .item {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.82rem; color: var(--color-text-secondary);
+  }
+  .cat-legend .sw { width: 12px; height: 12px; border-radius: 3px; background: var(--src-1); }
+  .cat-legend .sw.derived { background: var(--src-2); }
+  .cat-legend .sw.external { background: var(--src-3); }
+  .cat-legend .item b { color: var(--color-text-primary); font-weight: 500; }
+
+  @media (max-width: 680px) {
+    .cat-row { grid-template-columns: 1fr 34px; }
+    .cat-name { grid-column: 1 / -1; }
+    .cat-axis { padding-left: 0; }
   }
 
   /* ── full detail, folded away ── */
@@ -916,6 +927,11 @@
     font-family: var(--font-mono); font-size: 0.63rem; font-weight: 600;
     letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--color-text-secondary);
+  }
+  .sig-table .cat {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.05em; color: var(--color-text-secondary);
+    white-space: nowrap;
   }
   .sig-table .nm { font-size: 0.86rem; font-weight: 500; white-space: nowrap; }
   .sig-table .rd { font-size: 0.83rem; line-height: 1.5; color: var(--color-text-secondary); }
@@ -2434,14 +2450,18 @@
         <div class="cov-foot" id="cov-foot"></div>
       </div>
 
-      <div class="grp-grid" id="meth-groups"></div>
+      <div class="cat-chart">
+        <div id="meth-cats"></div>
+        <div class="cat-axis"><span>0</span><span>4 signals</span></div>
+        <div class="cat-legend" id="cat-legend"></div>
+      </div>
 
       <details class="meth-table">
         <summary>Full signal table · what each one reads</summary>
         <div class="scroll">
           <table class="sig-table">
             <thead>
-              <tr><th>Signal</th><th>What we read</th><th>Source</th><th>Updated</th></tr>
+              <tr><th>Category</th><th>Signal</th><th>What we read</th><th>Source</th><th>Updated</th></tr>
             </thead>
             <tbody id="meth-body"></tbody>
           </table>
@@ -3045,29 +3065,48 @@
     block.append(document.createTextNode('Block '), h('strong', null, '4,812,655'));
     foot.appendChild(block);
 
-    // ── the five groups ──
-    const grid = document.getElementById('meth-groups');
-    GROUPS.forEach(g => {
-      const card = h('div', 'grp');
+    // ── the five categories, as one stacked bar ──
+    // Sorted by signal count, then by how many are read straight from the
+    // chain: that puts Admin control (4 of 4 on-chain) directly above Yield
+    // (also 4, but only 1), which is the contrast worth seeing.
+    const cats = GROUPS.map(g => ({
+      n: g.n,
+      title: g.title,
+      total: g.rows.length,
+      counts: SOURCES.map(([k]) => g.rows.filter(r => r[2] === k).length),
+      names: SOURCES.map(([k]) => g.rows.filter(r => r[2] === k).map(r => r[0])),
+    })).sort((a, b) => (b.total - a.total) || (b.counts[0] - a.counts[0]));
 
-      const head = h('div', 'grp-head');
-      head.append(h('span', 'n', g.n), h('span', 't', g.title),
-        h('span', 'c', g.rows.length + ' signals'));
-      card.appendChild(head);
+    const maxTotal = Math.max(...cats.map(c => c.total));
+    const catBox = document.getElementById('meth-cats');
 
-      // a proportional strip: how verifiable this group's signals are
-      const strip = h('div', 'grp-units');
-      g.rows.forEach(([, , src]) => strip.appendChild(h('span', src)));
-      card.appendChild(strip);
+    cats.forEach(c => {
+      const row = h('div', 'cat-row');
 
-      g.rows.forEach(([name, reads, src, up]) => {
-        const row = h('div', 'grp-sig');
-        row.setAttribute('title', reads);
-        row.append(h('span', 'dot ' + src), h('span', null, name), h('span', 'fresh', up));
-        card.appendChild(row);
+      const name = h('span', 'cat-name');
+      name.append(h('span', 'n', c.n), h('span', null, c.title));
+      row.appendChild(name);
+
+      const track = h('span', 'cat-track');
+      SOURCES.forEach(([k, label], i) => {
+        if (!c.counts[i]) return;
+        const seg = h('span', 'seg ' + k);
+        seg.style.width = (c.counts[i] / maxTotal * 100).toFixed(2) + '%';
+        seg.setAttribute('title', `${c.counts[i]} ${label}: ${c.names[i].join(', ')}`);
+        track.appendChild(seg);
       });
+      row.appendChild(track);
 
-      grid.appendChild(card);
+      row.appendChild(h('span', 'cat-total', String(c.total)));
+      catBox.appendChild(row);
+    });
+
+    const legend = document.getElementById('cat-legend');
+    SOURCES.forEach(([k, label], i) => {
+      const total = cats.reduce((s, c) => s + c.counts[i], 0);
+      const item = h('span', 'item');
+      item.append(h('span', 'sw ' + k), h('b', null, String(total)), h('span', null, label));
+      legend.appendChild(item);
     });
 
     // ── full table, folded away so the page leads with the picture ──
@@ -3075,6 +3114,7 @@
     const LABEL = Object.fromEntries(SOURCES.map(([k, l]) => [k, l]));
     ALL.forEach(s => {
       const tr = h('tr');
+      tr.appendChild(h('td', 'cat', s.group));
       tr.appendChild(h('td', 'nm', s.name));
       tr.appendChild(h('td', 'rd', s.reads));
       const srcTd = h('td');
@@ -3107,7 +3147,7 @@
       if (step.href) el.setAttribute('href', step.href);
       if (step.view) el.dataset.view = step.view;
       if (step.note) el.setAttribute('title', step.note);
-      el.append(h('span', 'n', step.n), h('span', 't', step.t));
+      el.append(h('span', 'n', step.n), h('span', null, step.t));
       rail.appendChild(el);
     });
   })();
