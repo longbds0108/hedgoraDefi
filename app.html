@@ -280,6 +280,12 @@
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--color-safe);
   }
+  .chain-opt:disabled {
+    opacity: 0.6; cursor: wait;
+  }
+  .chain-opt:disabled .co-name {
+    color: var(--color-text-secondary);
+  }
   .addr-pill {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 12px; border: 1px solid var(--color-border);
@@ -4027,38 +4033,80 @@
       list.appendChild(opt);
 
       opt.addEventListener('click', async () => {
-        closeModal();
         if (!window.ethereum) {
-          alert('No wallet detected. Open in MetaMask or a compatible browser.');
+          showModalError('No wallet detected. Install MetaMask or a compatible browser wallet.');
           return;
         }
+
+        // Don't switch if already on this chain
+        const current = getCurrentChainId();
+        if (current === chain.id) { closeModal(); return; }
+
+        // Show loading state — keep modal open so user knows something is happening
+        setOptLoading(opt, true);
+        clearModalError();
+
         const hexId = '0x' + chain.id.toString(16);
+
+        // Strategy: try wallet_addEthereumChain first for custom chains
+        // (it both adds AND switches; for already-known chains wallets just switch)
         try {
-          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexId }] });
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: hexId,
+              chainName: chain.name,
+              nativeCurrency: chain.nativeCurrency,
+              rpcUrls: chain.rpcUrls,
+              blockExplorerUrls: chain.blockExplorerUrls,
+            }],
+          });
           updatePill(chain.id);
-        } catch (err) {
-          if (err.code === 4902 || err?.data?.originalError?.code === 4902) {
+          closeModal();
+        } catch (addErr) {
+          // User rejected (4001) or other error — try plain switch as fallback
+          if (addErr.code === 4001) {
+            showModalError('Switch cancelled.');
+          } else {
             try {
               await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                  chainId: hexId,
-                  chainName: chain.name,
-                  nativeCurrency: chain.nativeCurrency,
-                  rpcUrls: chain.rpcUrls,
-                  blockExplorerUrls: chain.blockExplorerUrls,
-                }],
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: hexId }],
               });
               updatePill(chain.id);
-            } catch (addErr) { console.warn('wallet_addEthereumChain failed:', addErr); }
-          } else { console.warn('wallet_switchEthereumChain failed:', err); }
+              closeModal();
+            } catch (switchErr) {
+              const msg = switchErr.code === 4001
+                ? 'Switch cancelled.'
+                : (switchErr.message || 'Could not switch network.');
+              showModalError(msg);
+            }
+          }
+        } finally {
+          setOptLoading(opt, false);
         }
       });
     });
 
+    // ── Loading / error helpers ───────────────────────────────────────────
+    function setOptLoading(optEl, on) {
+      optEl.disabled = on;
+      const nm = optEl.querySelector('.co-name');
+      if (nm) nm.textContent = on ? 'Waiting for wallet…' : CHAINS.find(c => c.id === parseInt(optEl.dataset.chainId))?.name || '';
+    }
+
+    const errEl = document.createElement('p');
+    errEl.className = 'chain-modal-err';
+    errEl.style.cssText = 'display:none;margin:0 14px 12px;font-size:0.8rem;color:var(--color-danger);';
+    document.getElementById('chain-list')?.after(errEl);
+
+    function showModalError(msg) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    function clearModalError() { errEl.textContent = ''; errEl.style.display = 'none'; }
+
     // ── Open / close modal ────────────────────────────────────────────────
     function openModal() {
       updatePill(getCurrentChainId());
+      clearModalError();
       overlay.classList.add('open');
       pill.classList.add('open');
       pill.setAttribute('aria-expanded', 'true');
