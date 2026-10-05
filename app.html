@@ -172,23 +172,57 @@
   .crumbs .current { color: var(--color-text-primary); font-weight: 500; }
   .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
   .net-pill {
+    position: relative;
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 12px; border-radius: 999px;
     background: var(--color-accent-soft);
     border: 1px solid rgba(232, 227, 213, 0.22);
     font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
     font-weight: 500;
+    cursor: pointer; user-select: none;
+    transition: border-color 0.15s, background 0.15s;
   }
+  .net-pill:hover { border-color: rgba(232, 227, 213, 0.5); background: rgba(232,227,213,0.13); }
   .net-pill .dot {
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--color-safe);
     box-shadow: 0 0 8px var(--color-safe);
     animation: pulse-safe 2.4s ease-in-out infinite;
   }
+  .net-pill .dot.warn { background: var(--color-warning); box-shadow: 0 0 8px var(--color-warning); animation: none; }
+  .net-pill .caret { opacity: 0.6; font-size: 0.6rem; transition: transform 0.2s; }
+  .net-pill.open .caret { transform: rotate(180deg); }
   @keyframes pulse-safe {
     0%, 100% { box-shadow: 0 0 6px var(--color-safe); }
     50%      { box-shadow: 0 0 14px var(--color-safe); }
   }
+
+  /* Chain selector dropdown */
+  .chain-dropdown {
+    display: none;
+    position: absolute; top: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%);
+    min-width: 220px;
+    background: #1a1528; border: 1px solid var(--color-border);
+    border-radius: 12px; padding: 6px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+    z-index: 1000;
+  }
+  .net-pill.open .chain-dropdown { display: block; }
+  .chain-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    cursor: pointer; font-size: 0.82rem;
+    letter-spacing: 0; text-transform: none; font-weight: 400;
+    transition: background 0.12s;
+  }
+  .chain-opt:hover { background: var(--color-surface-hover); }
+  .chain-opt.active { background: var(--color-accent-soft); font-weight: 600; }
+  .chain-opt .co-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .chain-opt .co-name { flex: 1; color: var(--color-text-primary); }
+  .chain-opt .co-check { color: var(--color-safe); font-size: 0.75rem; }
   .addr-pill {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 12px; border: 1px solid var(--color-border);
@@ -1990,7 +2024,12 @@
     </div>
     <div class="topbar-right">
       <span class="data-status" id="data-status">Starting…</span>
-      <span class="net-pill"><span class="dot"></span>Arc · testnet</span>
+      <button class="net-pill" id="chain-pill" aria-haspopup="listbox" aria-expanded="false">
+        <span class="dot" id="chain-dot"></span>
+        <span id="chain-label">Arc · testnet</span>
+        <span class="caret" aria-hidden="true">▼</span>
+        <div class="chain-dropdown" id="chain-dropdown" role="listbox" aria-label="Select network"></div>
+      </button>
       <span class="addr-pill" id="wallet-addr-pill"><span class="av"></span><span id="wallet-addr-text">Not connected</span></span>
       <button class="btn btn-ghost btn-sm" id="disconnect-btn">Disconnect</button>
     </div>
@@ -3782,6 +3821,162 @@
         window.location.href = 'index.html';
       });
     }
+  })();
+
+  // ─── Chain selector dropdown ───────────────────────────────────────────────
+  // To add a chain: push a new entry into CHAINS below. The id is the
+  // EIP-155 chainId (decimal). rpcUrls/blockExplorer are used for
+  // wallet_addEthereumChain when the wallet doesn't know the chain yet.
+  (function () {
+    const CHAINS = [
+      {
+        id: 5042002,
+        name: 'Arc Testnet',
+        label: 'Arc · testnet',
+        color: '#4FD1C5',
+        nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
+        rpcUrls: ['https://rpc.testnet.arc.io'],
+        blockExplorerUrls: ['https://explorer.testnet.arc.io'],
+      },
+      // ── Add more chains here ──────────────────────────────────────────────
+      // {
+      //   id: 11155111,
+      //   name: 'Sepolia',
+      //   label: 'Ethereum · Sepolia',
+      //   color: '#796AE6',
+      //   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+      //   rpcUrls: ['https://rpc.sepolia.org'],
+      //   blockExplorerUrls: ['https://sepolia.etherscan.io'],
+      // },
+    ];
+
+    const pill     = document.getElementById('chain-pill');
+    const label    = document.getElementById('chain-label');
+    const dot      = document.getElementById('chain-dot');
+    const dropdown = document.getElementById('chain-dropdown');
+    if (!pill || !dropdown) return;
+
+    // ── Detect current chain from provider or wagmi localStorage ──────────
+    function getCurrentChainId() {
+      try {
+        if (window.ethereum?.chainId) {
+          return parseInt(window.ethereum.chainId, 16);
+        }
+        const raw = localStorage.getItem('wagmi.store');
+        if (raw) {
+          const s = JSON.parse(raw)?.state;
+          return s?.chainId || null;
+        }
+      } catch {}
+      return null;
+    }
+
+    function updatePill(chainId) {
+      const chain = CHAINS.find(c => c.id === chainId) || null;
+      label.textContent = chain ? chain.label : 'Unknown network';
+      dot.style.background = chain ? chain.color : 'var(--color-warning)';
+      dot.className = chain ? 'dot' : 'dot warn';
+      // mark active in list
+      dropdown.querySelectorAll('.chain-opt').forEach(opt => {
+        opt.classList.toggle('active', parseInt(opt.dataset.chainId) === chainId);
+        const check = opt.querySelector('.co-check');
+        if (check) check.style.opacity = parseInt(opt.dataset.chainId) === chainId ? '1' : '0';
+      });
+    }
+
+    // ── Build dropdown list ───────────────────────────────────────────────
+    CHAINS.forEach(chain => {
+      const opt = document.createElement('div');
+      opt.className = 'chain-opt';
+      opt.setAttribute('role', 'option');
+      opt.dataset.chainId = chain.id;
+
+      const cdot = document.createElement('span');
+      cdot.className = 'co-dot';
+      cdot.style.background = chain.color;
+
+      const cname = document.createElement('span');
+      cname.className = 'co-name';
+      cname.textContent = chain.label;
+
+      const check = document.createElement('span');
+      check.className = 'co-check';
+      check.textContent = '✓';
+      check.style.opacity = '0';
+
+      opt.append(cdot, cname, check);
+      dropdown.appendChild(opt);
+
+      opt.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        closeDropdown();
+        if (!window.ethereum) {
+          alert('No injected wallet found. Open this page in a browser with MetaMask or a similar wallet.');
+          return;
+        }
+        const hexId = '0x' + chain.id.toString(16);
+        try {
+          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexId }] });
+          updatePill(chain.id);
+        } catch (err) {
+          // 4902 = chain not added to wallet yet
+          if (err.code === 4902 || err?.data?.originalError?.code === 4902) {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: hexId,
+                  chainName: chain.name,
+                  nativeCurrency: chain.nativeCurrency,
+                  rpcUrls: chain.rpcUrls,
+                  blockExplorerUrls: chain.blockExplorerUrls,
+                }],
+              });
+              updatePill(chain.id);
+            } catch (addErr) {
+              console.warn('Could not add chain:', addErr);
+            }
+          } else {
+            console.warn('Could not switch chain:', err);
+          }
+        }
+      });
+    });
+
+    // ── Toggle open/close ─────────────────────────────────────────────────
+    function openDropdown() {
+      updatePill(getCurrentChainId());
+      pill.classList.add('open');
+      pill.setAttribute('aria-expanded', 'true');
+    }
+    function closeDropdown() {
+      pill.classList.remove('open');
+      pill.setAttribute('aria-expanded', 'false');
+    }
+
+    pill.addEventListener('click', (e) => {
+      // Don't react to clicks originating inside the dropdown itself
+      if (e.target.closest('.chain-dropdown')) return;
+      pill.classList.contains('open') ? closeDropdown() : openDropdown();
+    });
+
+    // Close on outside click or Escape
+    document.addEventListener('click', (e) => {
+      if (!pill.contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDropdown();
+    });
+
+    // Listen for the wallet changing chain externally
+    if (window.ethereum) {
+      window.ethereum.on('chainChanged', (hexId) => {
+        updatePill(parseInt(hexId, 16));
+      });
+    }
+
+    // Init
+    updatePill(getCurrentChainId());
   })();
 </script>
 
