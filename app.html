@@ -192,6 +192,10 @@
   .net-pill .dot.warn { background: var(--color-warning); box-shadow: 0 0 8px var(--color-warning); animation: none; }
   .net-pill .caret { opacity: 0.6; font-size: 0.6rem; transition: transform 0.2s; }
   .net-pill.open .caret { transform: rotate(180deg); }
+  .chain-logo-sm {
+    width: 18px; height: 18px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0;
+  }
   @keyframes pulse-safe {
     0%, 100% { box-shadow: 0 0 6px var(--color-safe); }
     50%      { box-shadow: 0 0 14px var(--color-safe); }
@@ -2078,6 +2082,7 @@
     <div class="topbar-right">
       <span class="data-status" id="data-status">Starting…</span>
       <button class="net-pill" id="chain-pill" aria-haspopup="dialog">
+        <img class="chain-logo-sm" id="chain-logo-sm" src="/chains/arc.jpg" alt="Arc" />
         <span class="dot" id="chain-dot"></span>
         <span id="chain-label">Arc · testnet</span>
         <span class="caret" aria-hidden="true">▼</span>
@@ -3896,8 +3901,8 @@
         id: 5042002,
         name: 'Arc',
         label: 'Arc · testnet',
-        logoUrl: null,              // custom logo rendered as initials below
-        logoBg: '#4FD1C5',
+        logoUrl: '/chains/arc.jpg',
+        logoBg: '#0b1a3b',
         dotColor: '#4FD1C5',
         nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
         rpcUrls: ['https://rpc.testnet.arc.io'],
@@ -3942,6 +3947,7 @@
     const pill    = document.getElementById('chain-pill');
     const label   = document.getElementById('chain-label');
     const dot     = document.getElementById('chain-dot');
+    const logoSm  = document.getElementById('chain-logo-sm');
     const overlay = document.getElementById('chain-overlay');
     const list    = document.getElementById('chain-list');
     const closeBtn = document.getElementById('chain-modal-close');
@@ -3965,6 +3971,15 @@
         ? `background:${chain.dotColor};box-shadow:0 0 8px ${chain.dotColor}`
         : 'background:var(--color-warning);box-shadow:none';
       dot.className = chain ? 'dot' : 'dot warn';
+      if (logoSm) {
+        if (chain?.logoUrl) {
+          logoSm.src = chain.logoUrl;
+          logoSm.alt = chain.name;
+          logoSm.style.display = '';
+        } else {
+          logoSm.style.display = 'none';
+        }
+      }
       // sync active state in modal list
       list.querySelectorAll('.chain-opt').forEach(opt => {
         const active = parseInt(opt.dataset.chainId) === chainId;
