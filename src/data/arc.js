@@ -48,12 +48,14 @@ function fromVault(v) {
 }
 
 function fromMarket(m) {
+  const col = m.collateralAsset?.symbol ?? '?';
+  const loan = m.loanAsset?.symbol ?? '?';
   return {
-    name: `${m.collateralAsset.symbol} → ${m.loanAsset.symbol}`,
+    name: `${col} → ${loan}`,
     kind: 'market',
     type: 'lending',
-    asset: String(m.loanAsset.symbol || '').toLowerCase(),
-    label: `${m.loanAsset.symbol} borrow vs ${m.collateralAsset.symbol}`,
+    asset: loan.toLowerCase(),
+    label: `${loan} borrow vs ${col}`,
     protocol: (m.protocol || '').toUpperCase(),
     address: null,
     marketId: m.marketId,
@@ -104,9 +106,13 @@ export async function loadArcData() {
     kit.borrow.exploreMarkets({ chain: CHAIN, sortBy: 'borrowApy' }),
   ]);
 
+  const safeMap = (arr, fn) => arr.flatMap((item) => {
+    try { return [fn(item)]; } catch { return []; }
+  });
+
   const rows = [];
-  if (vaultsRes.status === 'fulfilled') rows.push(...(vaultsRes.value.vaults ?? []).map(fromVault));
-  if (marketsRes.status === 'fulfilled') rows.push(...(marketsRes.value.markets ?? []).map(fromMarket));
+  if (vaultsRes.status === 'fulfilled') rows.push(...safeMap(vaultsRes.value.vaults ?? [], fromVault));
+  if (marketsRes.status === 'fulfilled') rows.push(...safeMap(marketsRes.value.markets ?? [], fromMarket));
 
   await Promise.all(rows.map(async (row) => {
     if (!row.address) return;

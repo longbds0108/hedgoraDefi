@@ -26,7 +26,11 @@ async function boot() {
       'live',
     );
   } catch (e) {
-    setStatus(`Could not reach Arc: ${e.message}`, 'bad');
+    const msg = e?.message ?? String(e);
+    const friendly = /Cannot read|undefined|null/i.test(msg)
+      ? 'Arc data unavailable — check network or try again'
+      : msg;
+    setStatus(`Could not reach Arc: ${friendly}`, 'bad');
   }
 }
 

@@ -12,6 +12,9 @@ const get = async (path) => {
  */
 export async function contractProfile(address) {
   const a = await get(`/addresses/${address}`);
+  if (!a || typeof a !== 'object') {
+    return { verified: false, upgradeable: false, proxyType: null, creator: null, flaggedScam: false, explorerName: null };
+  }
   return {
     verified: a.is_verified === true,
     // A rewritable implementation slot is what makes a vault upgradeable.
@@ -28,7 +31,8 @@ export async function contractProfile(address) {
  * sorted, so the top slice is the concentration figure without extra work.
  */
 export async function concentration(address, top = 5) {
-  const { items = [] } = await get(`/tokens/${address}/holders`);
+  const raw = await get(`/tokens/${address}/holders`);
+  const { items = [] } = (raw && typeof raw === 'object') ? raw : {};
   const balances = items.map((h) => Number(h.value)).filter((n) => Number.isFinite(n));
   const total = balances.reduce((s, n) => s + n, 0);
   if (!total) return { topShare: null, holders: [], counted: 0 };
