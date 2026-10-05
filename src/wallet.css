@@ -1,99 +1,6 @@
-/* Uses the tokens already declared on :root in index.html, so the dialog
-   matches the page it opens over. */
-
-.lm-backdrop {
-  position: fixed; inset: 0; z-index: 200;
-  display: grid; place-items: center;
-  padding: 20px;
-  background: rgba(14, 11, 20, 0.78);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  animation: lm-fade .18s ease;
-}
-@keyframes lm-fade { from { opacity: 0; } }
-
-.lm {
-  width: 100%; max-width: 430px;
-  padding: 26px 26px 22px;
-  background: linear-gradient(155deg, var(--color-surface) 0%, rgba(22, 18, 31, 0.96) 100%);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  animation: lm-rise .22s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes lm-rise { from { opacity: 0; transform: translateY(10px); } }
-
-.lm-head {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 16px; margin-bottom: 22px;
-}
-.lm-head h2 {
-  font-family: var(--font-body);
-  font-size: 1.3rem; font-weight: 600; letter-spacing: -0.025em;
-  color: var(--color-text-primary);
-}
-.lm-head p {
-  margin-top: 6px;
-  font-size: 0.85rem; line-height: 1.5;
-  color: var(--color-text-secondary);
-}
-.lm-x {
-  flex: none; width: 30px; height: 30px;
-  border: 1px solid var(--color-border); border-radius: 8px;
-  background: transparent; color: var(--color-text-secondary);
-  font-size: 0.85rem; cursor: pointer;
-  transition: border-color .2s, color .2s;
-}
-.lm-x:hover { border-color: var(--color-accent); color: var(--color-accent); }
-
-.lm-opt {
-  width: 100%;
-  display: grid; grid-template-columns: 38px 1fr auto;
-  align-items: center; gap: 14px;
-  padding: 15px 16px; margin-bottom: 10px;
-  background: rgba(14, 11, 20, 0.5);
-  border: 1px solid var(--color-border); border-radius: 11px;
-  text-align: left; cursor: pointer;
-  font-family: inherit; color: var(--color-text-primary);
-  transition: border-color .2s ease, transform .2s ease, background .2s ease;
-}
-.lm-opt:hover {
-  border-color: var(--color-accent);
-  background: rgba(232, 227, 213, 0.05);
-  transform: translateY(-1px);
-}
-.lm-opt .ic {
-  width: 38px; height: 38px; border-radius: 10px;
-  display: grid; place-items: center;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  font-size: 1rem; color: var(--color-accent);
-}
-.lm-opt .ic.g {
-  font-family: var(--font-body); font-weight: 700;
-  color: var(--color-text-primary);
-}
-.lm-opt .txt { display: grid; gap: 3px; }
-.lm-opt .t { font-size: 0.93rem; font-weight: 500; }
-.lm-opt .d { font-size: 0.78rem; line-height: 1.45; color: var(--color-text-secondary); }
-.lm-opt .go { color: var(--color-text-secondary); font-size: 0.9rem; }
-
-.lm-note {
-  margin: 4px 0 12px; padding: 12px 14px;
-  border: 1px solid rgba(232, 181, 76, 0.3);
-  background: rgba(232, 181, 76, 0.08);
-  border-radius: 9px;
-  font-size: 0.8rem; line-height: 1.55;
-  color: var(--color-text-secondary);
-}
-
-.lm-skip {
-  display: block; margin-top: 16px; padding-top: 16px;
-  border-top: 1px solid var(--color-border);
-  text-align: center;
-  font-family: var(--font-mono); font-size: 0.72rem;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-.lm-skip:hover { color: var(--color-accent); }
+/* Uses the tokens already declared on :root in index.html, so the connected
+   pill matches the page it sits in. The wallet picker itself is RainbowKit's
+   own dialog, themed from landing.jsx. */
 
 /* Connected state, shown in the header where the Launch button was */
 .wallet-pill {
@@ -124,6 +31,5 @@
 .wallet-pill .unlink:hover { color: var(--color-danger); }
 
 @media (max-width: 520px) {
-  .lm { padding: 22px 18px 18px; }
   .wallet-pill .unlink { display: none; }
 }

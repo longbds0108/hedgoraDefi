@@ -6,7 +6,7 @@ import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 
 import { config } from './wagmi.js';
-import { LaunchModal } from './LaunchModal.jsx';
+import { WalletButton } from './WalletButton.jsx';
 import './wallet.css';
 
 const queryClient = new QueryClient();
@@ -25,7 +25,7 @@ if (mount) {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider theme={theme} modalSize="compact">
-            <LaunchModal />
+            <WalletButton />
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
@@ -33,8 +33,9 @@ if (mount) {
   );
 }
 
-// Any "Launch app" control on the static page opens the dialog instead of
-// navigating straight through.
+// "Launch app" opens the wallet picker instead of navigating straight through.
+// Reading protocol data needs no wallet, so the hero's "Explore DeFi" link
+// remains the way in without connecting.
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-launch]');
   if (!el) return;
