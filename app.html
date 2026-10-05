@@ -329,6 +329,9 @@
   .explore-layout {
     display: grid; grid-template-columns: 228px 1fr; gap: 24px; align-items: start;
   }
+  .explore-layout-nofilter {
+    grid-template-columns: 1fr;
+  }
 
   /* ───── Explore: filter rail ───── */
   .filter-rail {
@@ -784,6 +787,25 @@
   .know-item.good .mark { color: var(--color-safe); background: rgba(79, 209, 197, 0.12); border: 1px solid rgba(79, 209, 197, 0.35); }
   .know-item .txt { font-size: 0.95rem; line-height: 1.5; }
   .know-item .why { margin-top: 6px; font-size: 0.82rem; color: var(--color-text-secondary); }
+
+  /* Advanced details disclosure (Admin control + Concentration) */
+  .advanced-details {
+    margin-bottom: 20px;
+  }
+  .advanced-details > summary {
+    list-style: none; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; color: var(--color-text-secondary);
+    padding: 8px 12px; border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .advanced-details > summary::before {
+    content: '▸'; font-size: 0.75rem; transition: transform 0.2s;
+  }
+  .advanced-details[open] > summary::before { transform: rotate(90deg); }
+  .advanced-details > summary:hover { color: var(--color-text-primary); border-color: var(--color-accent); }
 
   @media (max-width: 1100px) {
     .pd-hero { grid-template-columns: 1fr; }
@@ -2003,48 +2025,7 @@
         </div>
       </div>
 
-      <div class="explore-layout">
-        <aside class="filter-rail">
-          <div class="filter-block">
-            <h4>Asset</h4>
-            <label class="check-row">
-              <input type="checkbox" class="f-asset" value="usdc" checked />
-              <span>USDC</span><span class="n">6</span>
-            </label>
-            <label class="check-row">
-              <input type="checkbox" class="f-asset" value="cirbtc" />
-              <span>cirBTC</span><span class="n">2</span>
-            </label>
-            <label class="check-row">
-              <input type="checkbox" class="f-asset" value="other" />
-              <span>Other</span><span class="n">1</span>
-            </label>
-          </div>
-
-          <div class="filter-block range-field">
-            <h4>Minimum APY</h4>
-            <input type="range" id="f-apy" min="0" max="20" step="0.5" value="0" />
-            <div class="ends">
-              <span>0%</span>
-              <span class="cur" id="f-apy-out">0%</span>
-              <span>20%+</span>
-            </div>
-          </div>
-
-          <div class="filter-block range-field">
-            <h4>Minimum TVL</h4>
-            <input type="range" id="f-tvl" min="0" max="100" step="1" value="0" />
-            <div class="ends">
-              <span>$0</span>
-              <span class="cur" id="f-tvl-out">$0</span>
-              <span>$100M+</span>
-            </div>
-          </div>
-
-          <div class="filter-block">
-            <button class="reset" id="f-reset">Reset filters</button>
-          </div>
-        </aside>
+      <div class="explore-layout explore-layout-nofilter">
 
         <div>
           <div class="result-meta">
@@ -2239,8 +2220,39 @@
         </div>
       </div>
 
-      <!-- ─── Admin control + Concentration ─── -->
-      <div class="grid-even" style="margin-bottom: 20px;">
+      <!-- ─── What should I know? ─── -->
+      <div class="know">
+        <h3>What should I know?</h3>
+        <div class="sub">3 things to know before depositing into Protocol X</div>
+        <div class="know-list">
+          <div class="know-item warn">
+            <span class="mark" aria-hidden="true">⚠</span>
+            <div>
+              <div class="txt">29.8% of the APY comes from incentives.</div>
+              <div class="why">If the reward program stops, the yield you keep is 5.21%, not 7.42%.</div>
+            </div>
+          </div>
+          <div class="know-item warn">
+            <span class="mark" aria-hidden="true">⚠</span>
+            <div>
+              <div class="txt">The contract can be upgraded by its admin.</div>
+              <div class="why">A single key — not the 3-of-5 multisig — can replace the code holding your deposit.</div>
+            </div>
+          </div>
+          <div class="know-item good">
+            <span class="mark" aria-hidden="true">✓</span>
+            <div>
+              <div class="txt">Current withdrawal liquidity represents 25% of deposited assets.</div>
+              <div class="why">$2.1M of $8.4M can leave today, which covers a normal exit but not a rush.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Admin control + Concentration (advanced, collapsed) ─── -->
+      <details class="advanced-details">
+        <summary>Advanced details — admin control &amp; concentration</summary>
+        <div class="grid-even" style="margin-top: 16px; margin-bottom: 20px;">
         <div class="glass">
           <div class="panel-head">
             <h3>Admin control</h3>
@@ -2318,36 +2330,8 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- ─── What should I know? ─── -->
-      <div class="know">
-        <h3>What should I know?</h3>
-        <div class="sub">3 things to know before depositing into Protocol X</div>
-        <div class="know-list">
-          <div class="know-item warn">
-            <span class="mark" aria-hidden="true">⚠</span>
-            <div>
-              <div class="txt">29.8% of the APY comes from incentives.</div>
-              <div class="why">If the reward program stops, the yield you keep is 5.21%, not 7.42%.</div>
-            </div>
-          </div>
-          <div class="know-item warn">
-            <span class="mark" aria-hidden="true">⚠</span>
-            <div>
-              <div class="txt">The contract can be upgraded by its admin.</div>
-              <div class="why">A single key — not the 3-of-5 multisig — can replace the code holding your deposit.</div>
-            </div>
-          </div>
-          <div class="know-item good">
-            <span class="mark" aria-hidden="true">✓</span>
-            <div>
-              <div class="txt">Current withdrawal liquidity represents 25% of deposited assets.</div>
-              <div class="why">$2.1M of $8.4M can leave today, which covers a normal exit but not a rush.</div>
-            </div>
-          </div>
         </div>
-      </div>
+      </details>
     </section>
 
     <!-- ══════════════════════════ VIEW: COMPARE ══════════════════════════ -->
@@ -2509,21 +2493,6 @@
         </div>
       </div>
 
-      <div class="pf-section-head" style="margin-top: 30px;">
-        <h2>Where each signal appears</h2>
-        <span class="sub">Click a step to open it</span>
-      </div>
-      <div class="flow-rail">
-        <div class="flow-rail-steps" id="meth-flow"></div>
-        <div class="flow-reads">
-          <span class="lead">Step 04 reads</span>
-          <span class="flow-facet">Yield</span>
-          <span class="flow-facet">Liquidity</span>
-          <span class="flow-facet">Security</span>
-          <span class="flow-facet">Admin</span>
-          <span class="flow-facet">Concentration</span>
-        </div>
-      </div>
     </section>
   </main>
 </div>
@@ -2867,11 +2836,6 @@
     const searchWrap = document.getElementById('exp-search-wrap');
     const sort = document.getElementById('exp-sort');
     const countOut = document.getElementById('exp-count');
-    const apyRange = document.getElementById('f-apy');
-    const tvlRange = document.getElementById('f-tvl');
-    const apyOut = document.getElementById('f-apy-out');
-    const tvlOut = document.getElementById('f-tvl-out');
-    const assetBoxes = Array.from(document.querySelectorAll('.f-asset'));
     const tray = document.getElementById('cmp-tray');
     const trayN = document.getElementById('cmp-n');
     const trayNames = document.getElementById('cmp-names');
@@ -2931,19 +2895,12 @@
 
     function render() {
       const type = activeType();
-      const assets = assetBoxes.filter(b => b.checked).map(b => b.value);
-      const minApy = parseFloat(apyRange.value);
-      const minTvl = parseFloat(tvlRange.value);
       const q = search.value.trim().toLowerCase();
 
-      apyOut.textContent = minApy + '%';
-      tvlOut.textContent = '$' + minTvl + 'M';
       searchWrap.classList.toggle('has-value', q.length > 0);
 
       let rows = DATA.filter(d =>
         (type === 'all' || d.type === type) &&
-        (assets.length === 0 || assets.includes(d.asset)) &&
-        d.apy >= minApy && d.tvl >= minTvl &&
         (q === '' || d.name.toLowerCase().includes(q) || d.label.toLowerCase().includes(q))
       );
 
@@ -2954,8 +2911,8 @@
       list.innerHTML = rows.length
         ? rows.map(card).join('')
         : `<div class="empty-state">
-             <h4>No opportunities match these filters</h4>
-             <p>Lower the minimum APY or TVL, or widen the asset selection.</p>
+             <h4>No opportunities match</h4>
+             <p>Try a different type tab or clear the search.</p>
            </div>`;
     }
 
@@ -2986,18 +2943,7 @@
       render();
     });
 
-    document.getElementById('f-reset').addEventListener('click', () => {
-      assetBoxes.forEach(b => { b.checked = b.value === 'usdc'; });
-      apyRange.value = 0;
-      tvlRange.value = 0;
-      search.value = '';
-      sort.value = 'apy';
-      tabs.querySelectorAll('.filter-chip').forEach((c, i) => c.classList.toggle('on', i === 0));
-      render();
-    });
-
-    [search, sort, apyRange, tvlRange].forEach(el => el.addEventListener('input', render));
-    assetBoxes.forEach(b => b.addEventListener('change', render));
+    [search, sort].forEach(el => el.addEventListener('input', render));
 
     Store.onChange(() => { render(); renderTray(); });
     render();
@@ -3190,7 +3136,7 @@
     ];
 
     const rail = document.getElementById('meth-flow');
-    FLOW.forEach((step, i) => {
+    if (rail) FLOW.forEach((step, i) => {
       if (i) rail.appendChild(h('span', 'flow-arrow', '→'));
       const interactive = step.href || step.view;
       const el = step.href ? h('a') : interactive ? h('button') : h('span');
@@ -3487,25 +3433,21 @@
     dep.appendChild(depMeter);
 
     [
-      ['organic', 'Organic yield', orgShare, organicYr],
-      ['incentive', 'Incentives', 100 - orgShare, incentiveYr],
-    ].forEach(([kind, label, pct, amount]) => {
+      ['organic', 'Organic yield', orgShare],
+      ['incentive', 'Incentives', 100 - orgShare],
+    ].forEach(([kind, label, pct]) => {
       const row = h('div', 'dep-row');
       row.append(
         h('span', 'sw ' + kind),
         h('span', 'k', label),
         h('span', 'p', Math.round(pct) + '%'),
-        h('span', 'amt', usd(amount, 2) + '/yr'),
       );
       dep.appendChild(row);
     });
 
     const swing = h('div', 'dep-swing');
-    const strong = h('strong', null,
-      `If every incentive program stopped, your blended APY would fall from ${blended.toFixed(2)}% to ${blendedOrganic.toFixed(2)}%.`);
-    swing.appendChild(strong);
-    swing.appendChild(document.createTextNode(
-      ` That is ${usd(incentiveYr, 2)} a year of the ${usd(yieldYr, 2)} you are currently earning.`));
+    swing.appendChild(h('strong', null,
+      `If incentive programs stopped, your blended APY would fall from ${blended.toFixed(2)}% to ${blendedOrganic.toFixed(2)}%.`));
     dep.appendChild(swing);
   })();
 
@@ -3541,8 +3483,6 @@
       { label: 'Upgradeable', cell: d => d.upgradeable
           ? { text: 'Yes', icon: '⚠', kind: 'warn' }
           : { text: 'No', icon: '✓', kind: 'ok' } },
-      { label: 'Admin', cell: d => ({ text: d.admin, kind: d.admin.includes('EOA') ? 'warn' : null }) },
-      { label: 'Oracle', cell: d => ({ text: d.oracle, kind: d.oracle === 'Single feed' ? 'warn' : null }) },
     ];
 
     // Readings, not a verdict: each line states a fact and the trade-off that
