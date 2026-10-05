@@ -1991,8 +1991,8 @@
     <div class="topbar-right">
       <span class="data-status" id="data-status">Starting…</span>
       <span class="net-pill"><span class="dot"></span>Arc · testnet</span>
-      <span class="addr-pill"><span class="av"></span>0xa94c…37f1</span>
-      <button class="btn btn-ghost btn-sm">Disconnect</button>
+      <span class="addr-pill" id="wallet-addr-pill"><span class="av"></span><span id="wallet-addr-text">Not connected</span></span>
+      <button class="btn btn-ghost btn-sm" id="disconnect-btn">Disconnect</button>
     </div>
   </header>
 
@@ -2355,7 +2355,7 @@
       <div class="page-head">
         <div>
           <h1>Portfolio</h1>
-          <div class="sub">Positions read from your connected wallet · 0xa94c…37f1</div>
+          <div class="sub">Positions read from your connected wallet · <span id="pf-wallet-addr">—</span></div>
         </div>
         <div class="page-head-actions">
           <button class="btn btn-ghost btn-sm">Refresh ↻</button>
@@ -3711,6 +3711,77 @@
         b.classList.add('on');
       }));
     });
+  })();
+
+  // ─── Wallet address: read from wagmi v2 localStorage and populate UI ───
+  (function () {
+    function getWagmiAddress() {
+      try {
+        const raw = localStorage.getItem('wagmi.store');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const state = parsed?.state;
+        if (!state) return null;
+        // wagmi v2 serialises Map as {__type:'Map', value:[[uid, conn],...]}
+        const conns = state.connections;
+        let accounts;
+        if (conns && conns.__type === 'Map' && Array.isArray(conns.value)) {
+          const current = state.current;
+          const entry = current
+            ? conns.value.find(([uid]) => uid === current)
+            : conns.value[0];
+          accounts = entry?.[1]?.accounts;
+        } else if (conns instanceof Object) {
+          // plain object keyed by uid (some versions)
+          const first = Object.values(conns)[0];
+          accounts = first?.accounts;
+        }
+        return Array.isArray(accounts) && accounts[0] ? accounts[0] : null;
+      } catch { return null; }
+    }
+
+    function shortAddr(addr) {
+      return addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : 'Not connected';
+    }
+
+    function applyAddress(addr) {
+      const short = shortAddr(addr);
+      const textEl = document.getElementById('wallet-addr-text');
+      if (textEl) textEl.textContent = short;
+
+      // Portfolio subtitle
+      const pfEl = document.getElementById('pf-wallet-addr');
+      if (pfEl) pfEl.textContent = addr ? short : '—';
+
+      // Disconnect button: hide if no wallet
+      const disc = document.getElementById('disconnect-btn');
+      if (disc) disc.style.display = addr ? '' : 'none';
+
+      // Color the avatar based on address
+      const av = document.querySelector('#wallet-addr-pill .av');
+      if (av && addr) {
+        const h = parseInt(addr.slice(2, 8), 16) % 360;
+        av.style.background = `linear-gradient(135deg, hsl(${h},60%,70%), hsl(${(h+160)%360},70%,55%))`;
+      }
+    }
+
+    const addr = getWagmiAddress();
+    applyAddress(addr);
+
+    // Disconnect clears wagmi storage and returns to landing
+    const disc = document.getElementById('disconnect-btn');
+    if (disc) {
+      disc.addEventListener('click', () => {
+        // Clear all wagmi-prefixed keys from localStorage
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('wagmi')) toRemove.push(k);
+        }
+        toRemove.forEach(k => localStorage.removeItem(k));
+        window.location.href = 'index.html';
+      });
+    }
   })();
 </script>
 
